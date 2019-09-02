@@ -78,19 +78,19 @@ namespace OurUmbraco.Our
             //Check if member is an admin (in group 'admin')
             if (Utils.IsAdmin(_currentMember))
             {
+               
+                    //Yep - it's valid, lets get that member
+                    Member MemberToBlock = Utils.GetMember(memberId);
 
-                //Yep - it's valid, lets get that member
-                Member MemberToBlock = Utils.GetMember(memberId);
+                    //Now we have the member - lets update the 'blocked' property on the member
+                    MemberToBlock.getProperty("blocked").Value = false;
 
-                //Now we have the member - lets update the 'blocked' property on the member
-                MemberToBlock.getProperty("blocked").Value = false;
+                    //Save the changes
+                    MemberToBlock.Save();
 
-                //Save the changes
-                MemberToBlock.Save();
-
-                //It's all good...
-                return "true";
-
+                    //It's all good...
+                    return "true";
+                
             }
 
             //Member not authorised or memberID passed in is not valid
@@ -106,20 +106,17 @@ namespace OurUmbraco.Our
             if (Utils.IsHq(_currentMember))
             {
                 //Lets check the memberID of the member we are blocking passed into /base is a valid member..
-                //Yep - it's valid, lets get that member
-                var member = Utils.GetMember(memberId);
+                    //Yep - it's valid, lets get that member
+                    var member = Utils.GetMember(memberId);
 
-                Membership.DeleteUser(member.LoginName, true);
+                    Membership.DeleteUser(member.LoginName, true);
 
-                using (var sqlHelper = Application.SqlHelper)
-                {
-                    sqlHelper.ExecuteNonQuery("UPDATE forumForums SET latestAuthor = 0 WHERE latestAuthor = @memberId",
-                        sqlHelper.CreateParameter("@memberId", memberId));
-                }
+                    Application.SqlHelper.ExecuteNonQuery("UPDATE forumForums SET latestAuthor = 0 WHERE latestAuthor = @memberId",
+                        Application.SqlHelper.CreateParameter("@memberId", memberId));
 
-                //It's all good...
-                return "true";
-
+                    //It's all good...
+                    return "true";
+                
             }
 
             //Member not authorised or memberID passed in is not valid
@@ -129,27 +126,30 @@ namespace OurUmbraco.Our
         [RestExtensionMethod(AllowGroup = "HQ", ReturnXml = false)]
         public static string GetBlockedMembers()
         {
-            var currentMember = HttpContext.Current.User.Identity.IsAuthenticated ? (int)Membership.GetUser().ProviderUserKey : 0;
+            int _currentMember = HttpContext.Current.User.Identity.IsAuthenticated ? (int)Membership.GetUser().ProviderUserKey : 0;
 
             //Check if member is an admin (in group 'admin')
-            //Member not authorised or memberID passed in is not valid
-            if (Utils.IsHq(currentMember) == false) return string.Empty;
-
-            var returnValue = string.Empty;
-
-            const string blockedMembersQuery = "SELECT contentNodeId FROM cmsPropertyData WHERE propertytypeid = (SELECT id FROM cmsPropertyType WHERE alias = 'blocked') AND dataInt = 1";
-
-            using (var reader = Application.SqlHelper.ExecuteReader(blockedMembersQuery))
+            if (Utils.IsHq(_currentMember))
             {
+                var returnValue = string.Empty;
+
+                const string blockedMembersQuery = "SELECT contentNodeId FROM cmsPropertyData WHERE propertytypeid = (SELECT id FROM cmsPropertyType WHERE alias = 'blocked') AND dataInt = 1";
+
+                var reader = Data.SqlHelper.ExecuteReader(blockedMembersQuery);
+
                 while (reader.Read())
                 {
                     var memberId = reader.GetInt("contentNodeId");
                     returnValue = returnValue + "<a href=\"/member/" + memberId + "\">" + memberId + "</a><br />";
                 }
+                
+                //It's all good...
+                return returnValue;
             }
 
-            //It's all good...
-            return returnValue;
+            //Member not authorised or memberID passed in is not valid
+            return "";
         }
+
     }
 }

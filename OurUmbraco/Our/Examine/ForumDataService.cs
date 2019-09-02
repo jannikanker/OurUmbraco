@@ -23,7 +23,7 @@ namespace OurUmbraco.Our.Examine
             foreach (var currentComment in topic.Comments.Where(c => c.IsSpam == false))
                 commentText += currentComment.Body;
 
-            var body = (topic.Body + commentText).StripHtml();
+            var body = library.StripHtml(topic.Body + commentText);
 
             simpleDataSet.NodeDefinition.NodeId = id;
             simpleDataSet.NodeDefinition.Type = indexType;

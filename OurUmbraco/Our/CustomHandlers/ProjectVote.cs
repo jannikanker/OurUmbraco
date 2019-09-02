@@ -22,7 +22,7 @@ namespace OurUmbraco.Our.CustomHandlers
 
             if (a.Alias == "ProjectUp")
             {
-                var contentService = ApplicationContext.Current.Services.ContentService;
+                var contentService = UmbracoContext.Current.Application.Services.ContentService;
                 var content = contentService.GetById(e.ItemId);
                 if (content.GetValue<bool>("approved") == false &&
                     Xslt.Score(content.Id, "powersProject") >= 15)
@@ -39,7 +39,7 @@ namespace OurUmbraco.Our.CustomHandlers
 
             if (a.Alias == "ProjectUp" || a.Alias == "ProjectDown")
             {
-                var contentService = ApplicationContext.Current.Services.ContentService;
+                var contentService = UmbracoContext.Current.Application.Services.ContentService;
                 var content = contentService.GetById(e.ItemId);
 
                 e.ReceiverId = content.GetValue<int>("owner");

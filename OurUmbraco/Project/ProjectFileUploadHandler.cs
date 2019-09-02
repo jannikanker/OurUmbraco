@@ -5,7 +5,6 @@ using OurUmbraco.MarketPlace.Interfaces;
 using OurUmbraco.Our;
 using OurUmbraco.Wiki.BusinessLogic;
 using umbraco.cms.businesslogic.member;
-using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Web;
 
@@ -62,7 +61,7 @@ namespace OurUmbraco.Project
 
                     var packageFileType = (FileType)Enum.Parse(typeof(FileType), (string)fileType , true);
                     // TODO: Don't know how else to get the bloody version
-                    var version = ApplicationContext.Current.Services.ContentService.GetById(p.Id).Version;
+                    var version = UmbracoContext.Current.Application.Services.ContentService.GetById(p.Id).Version;
                     mediaProvider.CreateFile(fileName, version, mem.UniqueId, file, packageFileType, v, dotNetVersion, trust);
 
                 } else {

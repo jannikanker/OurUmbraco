@@ -1,46 +1,58 @@
-﻿using System.Xml;
-using Umbraco.Core;
-using Umbraco.Web;
+﻿using System.Collections;
+using System.Xml;
+using umbraco.cms.businesslogic.member;
 
-namespace OurUmbraco.Powers.BusinessLogic
-{
+namespace OurUmbraco.Powers.BusinessLogic {
     public class Reputation {
 
         public int Current { get; set; }
         public int Total { get; set; }
         public int MemberId { get; set; }
                 
-        public void Save()
-        {
-            if (MemberId <= 0)
-                return;
+        public void Save() {
+            if (MemberId > 0) {
+                Member m = Library.Utils.GetMember(MemberId);
+                m.getProperty(config.GetKey("/configuration/reputation/currentPointsAlias")).Value = Current;
+                m.getProperty(config.GetKey("/configuration/reputation/totalPointsAlias")).Value = Total;
+                
+                m.XmlGenerate(new XmlDocument());
+                m.Save();
 
-            var memberService = ApplicationContext.Current.Services.MemberService;
-            var member = memberService.GetById(MemberId);
-            member.SetValue(config.GetKey("/configuration/reputation/currentPointsAlias"), Current);
-            member.SetValue(config.GetKey("/configuration/reputation/totalPointsAlias"), Total);
-            memberService.Save(member);
+                //make sure a cached member gets updated.
+                Hashtable mems = Member.CachedMembers();
+                if (mems.ContainsKey(m.Id)) {
+                    mems.Remove(m.Id);
+                    mems.Add(m.Id, m);
+                }
+
+            }
         }
 
-        public Reputation(int memberId)
-        {
-            var memberShipHelper = new Umbraco.Web.Security.MembershipHelper(Umbraco.Web.UmbracoContext.Current);
-            var member = memberShipHelper.GetById(memberId);
+        public Reputation(int memberId){
+            Member m = Library.Utils.GetMember(memberId);
 
-            if (member == null)
-                return;
-
-            Current = member.GetPropertyValue<int>(config.GetKey("/configuration/reputation/currentPointsAlias"));
-            Total = member.GetPropertyValue<int>(config.GetKey("/configuration/reputation/totalPointsAlias"));
-            MemberId = memberId;
+            if (m != null) {
+                Current = obToInt( m.getProperty(config.GetKey("/configuration/reputation/currentPointsAlias")).Value );
+                Total = obToInt( m.getProperty(config.GetKey("/configuration/reputation/totalPointsAlias")).Value );
+                MemberId = m.Id;
+            }
         }
 
-        public XmlNode ToXml(XmlDocument xmlDocument)
-        {
-            var xmlNode = xmlDocument.CreateElement("reputation");
-            xmlNode.AppendChild(XmlHelper.AddTextNode(xmlDocument, "current", Total.ToString()));
-            xmlNode.AppendChild(XmlHelper.AddCDataNode(xmlDocument, "total", Current.ToString()));
-            return xmlNode;
+        private int obToInt(object val) { 
+            int retval = 0;
+            int.TryParse(val.ToString(), out retval);
+
+            return retval;          
+        }
+
+        public XmlNode ToXml(XmlDocument d) {
+
+            XmlNode tx = d.CreateElement("reputation");
+
+            tx.AppendChild(umbraco.xmlHelper.addTextNode(d, "current", Total.ToString()));
+            tx.AppendChild(umbraco.xmlHelper.addCDataNode(d, "total", Current.ToString()));
+
+            return tx;
         }
     }
 }

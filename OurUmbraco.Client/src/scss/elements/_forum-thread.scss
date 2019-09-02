@@ -157,7 +157,7 @@
 
 			.profile {
 				width: auto;
-				flex: 0 0 70%;
+				flex: 0 0 50%;
 				flex-direction: column;
 
 				a {
@@ -194,7 +194,7 @@
 
 			.time {
 				text-decoration: none;
-				flex: 0 0 30%;
+				flex: 0 0 50%;
 
 				text-align: right;
 			}
@@ -253,12 +253,6 @@
 					@media (min-width: $md) {
 						font-size: .9rem;
 					}
-					@media(max-width: $xs)
-					{
-    					max-width: 15em;
-    					overflow: hidden;
-    					text-overflow: ellipsis;
-					}
 				}
 			}
 
@@ -266,12 +260,12 @@
 			.topic {
 				flex: 0 0 100%;
 
-				margin-bottom: 15px;
+				margin-bottom: .2rem;
+				word-break: break-all;
 
 				@media (min-width: $md) {
-					flex: 1 1 70%;
-					padding-right: 10px;
-					margin-bottom: 0;
+					flex: 0 0 70%;
+					padding-right: 3px;
 				}
 			}
 
@@ -282,8 +276,7 @@
 				flex: 0 0 100%;
 
 				@media (min-width: $md) {
-					flex: 1 1 30%;
-					margin-left: auto;
+					flex: 0 0 30%;
 					flex-direction: column;
 				}
 
@@ -294,7 +287,7 @@
 				margin: 0 .5rem 0 0;
 
 				@media (min-width: $md) {
-					margin: 0 0 .5rem auto;
+					margin: 0 0 .5rem 0;
 				}
 			}
 		}
@@ -533,8 +526,7 @@
 		display: inline-block;
 		margin: 0px auto 50px;
 		text-align: center;
-		padding-top: 10px;
-		
+
 		&.reply {
 			font-size: .85rem;
 

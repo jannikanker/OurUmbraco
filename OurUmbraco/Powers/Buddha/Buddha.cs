@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Xml;
-using umbraco.BusinessLogic;
+using umbraco.DataLayer;
 
 namespace OurUmbraco.Powers.Buddha
 {
@@ -11,6 +11,7 @@ namespace OurUmbraco.Powers.Buddha
         public string WebRoot { get; set; }
 
         private XmlDocument _config;
+        private ISqlHelper _sqlhelper;
 
         private Char sep = System.IO.Path.DirectorySeparatorChar;
        
@@ -27,6 +28,8 @@ namespace OurUmbraco.Powers.Buddha
 
             if (!Directory.Exists(WebRoot + sep + karmaDir))
                 Directory.CreateDirectory(WebRoot + sep + karmaDir);
+
+            _sqlhelper = DataLayerHelper.CreateSqlHelper(ConnectionString);
 
             _config = new XmlDocument();
             _config.Load(WebRoot + sep + "config" + sep + "uPowers.config");
@@ -52,14 +55,13 @@ namespace OurUmbraco.Powers.Buddha
         //here we do all the detail, and dig into each individual member
         public void CalculateKarmaHistory()
         {
-            const string memberSql = "SELECT nodeId from cmsMember";
+            string memberSql = "SELECT nodeId from cmsMember";
 
-            using (var reader = Application.SqlHelper.ExecuteReader(memberSql))
+            IRecordsReader rr = _sqlhelper.ExecuteReader(memberSql);
+
+            while (rr.Read())
             {
-                while (reader.Read())
-                {
-                    ProcessMember(reader.GetInt("nodeId"));
-                }
+                ProcessMember( rr.GetInt("nodeId") );
             }
         }
 
@@ -79,17 +81,15 @@ namespace OurUmbraco.Powers.Buddha
             string forumTopics = "SELECT count(id) from forumTopics WHERE memberID = " + memberId.ToString();
             string forumComments = "SELECT count(id) from forumComments WHERE memberID = " + memberId.ToString();
 
-            using (var sqlHelper = Application.SqlHelper)
-            {
-                int topicCount = sqlHelper.ExecuteScalar<int>(forumTopics);
-                int commentCount = sqlHelper.ExecuteScalar<int>(forumComments);
+            int topicCount = _sqlhelper.ExecuteScalar<int>(forumTopics);
+            int commentCount = _sqlhelper.ExecuteScalar<int>(forumComments);
 
-                XmlNode karma = doc.SelectSingleNode("//karma");
-                XmlNode forum = umbraco.xmlHelper.addTextNode(doc, "forum", "");
-                forum.AppendChild(umbraco.xmlHelper.addTextNode(doc, "topics", topicCount.ToString()));
-                forum.AppendChild(umbraco.xmlHelper.addTextNode(doc, "comments", commentCount.ToString()));
-                karma.AppendChild(forum);
-            }
+            XmlNode karma = doc.SelectSingleNode("//karma");
+            XmlNode forum = umbraco.xmlHelper.addTextNode(doc, "forum","");
+            forum.AppendChild( umbraco.xmlHelper.addTextNode(doc, "topics", topicCount.ToString()));
+            forum.AppendChild(umbraco.xmlHelper.addTextNode(doc, "comments", commentCount.ToString()));
+            karma.AppendChild(forum);
+
 
             if (File.Exists(memberKarmaFile))
                 File.Delete(memberKarmaFile);
@@ -261,6 +261,8 @@ namespace OurUmbraco.Powers.Buddha
         public void Dispose()
         {
             _config = null;
+            _sqlhelper.Dispose();
+            _sqlhelper = null;
         }
 
         #endregion

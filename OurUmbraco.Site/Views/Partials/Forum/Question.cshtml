@@ -1,71 +1,34 @@
-﻿@inherits UmbracoViewPage<Topic>
-@using OurUmbraco.Community.People
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<OurUmbraco.Forum.Models.Topic>
 @using OurUmbraco.Forum.Extensions
-@using OurUmbraco.Forum.Models
-@using OurUmbraco.Our.Extensions
 @using OurUmbraco.Powers.Library
 
 @{
-    var currentMember = Model.MemberData != null && Model.MemberData.Member != null ? Model.MemberData.Member : null;
-    var topicAuthor = new TopicMember();
-    if (Model.TopicMembers != null)
-    {
-        topicAuthor = Model.TopicMembers.FirstOrDefault(x => x.Member.Id == Model.MemberId);
-    }
-    var currentMemberIsAuthor = currentMember != null && topicAuthor != null && currentMember.Id == topicAuthor.Member.Id;
-    var memberIsAdmin = Model.MemberData != null && Model.MemberData.IsAdmin;
-    var canSeePost = Model.IsSpam == false || currentMemberIsAuthor || memberIsAdmin;
+    var currentMember = Members.GetCurrentMember();
+    var topicAuthor = Members.GetById(Model.MemberId);
 
-    @* If author exists and question is either not spam or the viewer is a the author or an admin *@
-    if (canSeePost)
+    @* If author exists and question is either not spam or the viewer is a the author or an admin admin *@
+    if (topicAuthor != null && (Model.IsSpam == false || (currentMember != null && currentMember.Id == topicAuthor.Id) || Members.IsAdmin()))
     {
-        var badges = new List<Badge>();
-        if (topicAuthor != null)
-        {
-            badges = topicAuthor.Roles.GetBadges();
-        }
+        var forum = Umbraco.TypedContent(Model.ParentId);
+        var roles = topicAuthor.GetRoles();
+
 
         <li class="comment question" id="comment-@Model.Id" data-deeplink="@Model.Title" data-version="@Model.Version" data-cat="@Model.ParentId">
             <!-- Start of question -->
             <div class="meta">
                 <div class="profile">
-                    @if (topicAuthor != null)
-                    {
-                        <a href="/member/@topicAuthor.Member.Id">@topicAuthor.Member.Name</a>
-                        <span>
-                            @if (topicAuthor.Member.ForumPosts() == 0 || topicAuthor.Member.ForumPosts() > 1)
-                            {
-                                @topicAuthor.Member.ForumPosts()
-                                <text>posts</text>
-                            }
-                            else
-                            {
-                                @topicAuthor.Member.ForumPosts()
-                                <text>post</text>
-                            }
-                        </span>
-                        <span>@topicAuthor.Member.Karma() karma points</span>
-                    }
-                    else
-                    {
-                        <p><em>Topic author was deleted</em></p>
-                    }
-                    @if (badges.Any())
+                    <a href="/member/@topicAuthor.Id">@topicAuthor.Name</a> <span>@if (topicAuthor.ForumPosts() == 0 || topicAuthor.ForumPosts() > 1){@topicAuthor.ForumPosts() <text>posts</text>}else{@topicAuthor.ForumPosts() <text>post</text>}</span> <span>@topicAuthor.Karma() karma points</span>
+
+                    @if (roles.Any())
                     {
                         <span class="roles">
-                            @foreach (var badge in badges)
+                            @foreach (var role in roles)
                             {
-                                if (string.IsNullOrWhiteSpace(badge.Link))
-                                {
-                                    <span class="@badge.CssClass">@badge.Name</span>
-                                }
-                                else
-                                {
-                                    <span class="@badge.CssClass"><a href="@badge.Link">@badge.Name</a></span>
-                                }
+                                <span class="@role">@role</span>
                             }
                         </span>
                     }
+
                 </div>
 
                 <div class="time" title="@(string.Format("{0:ddd, dd MMM yyyy} {0:HH:mm:ss} UTC+{1}", Model.Created, TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now)))">
@@ -74,35 +37,27 @@
             </div>
 
             <div class="comment-inner">
-                @if (topicAuthor != null)
-                {
-                    var avatarService = new AvatarService();
-                    var img = avatarService.GetImgWithSrcSet(topicAuthor.Member, topicAuthor.Member.Name, 75);
-
-                    <a href="/member/@topicAuthor.Member.Id" class="photo">@Html.Raw(img)</a>
-                    <div class="highfive highfive-question">
-                        @{
-                            var html = "High fives from:<br />";
-                            foreach (var vote in Model.Votes)
-                            {
-                                html = string.Format("{0}<a href='/member/{1}'>{2}</a><br />", html, vote.MemberId, vote.MemberName);
-                            }
-                            @*html = string.Format("{0}<a href=\"/documentation/our/karma\" class=\"explain\">what is this?</a><br />", html);*@
-                        }
-                        <div class="highfive-count votes-tooltip" title="@(Model.Votes.Any() ? html : null)">
-                            @Model.Score
-                        </div>
-                        @if (currentMember != null && !Utils.HasVoted(currentMember.Id, Model.Id, "powersTopic"))
+                <a href="/member/@topicAuthor.Id" class="photo">@Html.Raw(OurUmbraco.Our.Utils.GetMemberAvatar(topicAuthor, 75))</a>
+                <div class="highfive highfive-question">
+                    @{
+                        var html = "High fives from:<br />";
+                        foreach (var vote in Model.Votes)
                         {
-                            if (currentMember.Id != Model.MemberId)
-                            {
-                                <a href="#" data-id="@Model.Id">
-                                    <img src="/assets/images/highfive.svg" alt="high five"/>High Five
-                                </a>
-                            }
+                            html = string.Format("{0}<a href='/member/{1}'>{2}</a><br />", html, vote.MemberId, vote.MemberName);
                         }
+                        @*html = string.Format("{0}<a href=\"/documentation/our/karma\" class=\"explain\">what is this?</a><br />", html);*@
+                    }                    
+                    <div class="highfive-count votes-tooltip" title="@(Model.Votes.Any() ? html : null)">
+                        @Model.Score
                     </div>
-                }
+                    @if (Members.IsLoggedIn() && !Utils.HasVoted(currentMember.Id, Model.Id, "powersTopic"))
+                    {
+                        if (currentMember.Id != Model.MemberId)
+                        {
+                            <a href="#" data-id="@Model.Id"><img src="/assets/images/highfive.svg" alt="high five"/>High Five</a>
+                        }
+                    }
+                </div>
 
                 <div class="body-meta">
                     <div class="topic">
@@ -110,7 +65,7 @@
                     </div>
                     <div class="categories">
                         <div class="category core">
-                            <a href="@Model.ForumUrl">@Model.ForumName</a>
+                            <a href="@forum.Url">@forum.Name</a>
                         </div>
 
                         @if (Model.Version > 0)
@@ -123,16 +78,17 @@
                 </div>
 
                 <div class="body markdown-syntax">
-                    @if ((currentMemberIsAuthor || memberIsAdmin) && Model.IsSpam)
+
+                    @if (Model.IsSpam)
                     {
                         <div class="alert">
-                            @if (memberIsAdmin)
+                            @if (Members.IsAdmin())
                             {
                                 <span>You can see this topic because you're a moderator of the forum.</span><br/><br/>
                             }
-                            Sorry if we're causing you any inconvenience but this post has been automatically marked for manual approval. A moderator has been notified and will evaluate to make sure you're not trying to post spam. <br/>
-                            Only moderators and the post author can see this post. When this post has been approved this post will be shown as normal. After that, your future posts will not need manual approval.<br/><br/>
-                            <strong>Note:</strong> We will send you an email when your account has been approved.<br/><br/>
+                            Sorry if we're causing you any inconvenience but this post has been automatically marked for manual approval. A moderator has been notified and will evaluate to make sure you're not trying to post spam. <br />
+                            Only moderators and the post author can see this post. When this post has been approved this post will be shown as normal. After that, your future posts will not need manual approval.<br /><br />
+                            <strong>Note:</strong> We will send you an email when your account has been approved.<br /><br />
                             <strong>Why are we doing this?</strong> We're dealing with a spam problem that cannot be fought with automated systems. Therefore, we approve each account that has a low number of posts manually. Again, sorry for the inconvenience, we much appreciate your contribution and your patience while we approve your account.
                         </div>
                     }
@@ -142,20 +98,20 @@
             </div>
 
             <div class="actions">
-                @if (currentMember != null)
+                @if (Members.IsLoggedIn())
                 {
                     <a href="#" class="flag-thread" data-id="@Model.Id" data-member="@currentMember.Id">
                         <i class="icon-Flag"></i><span>Flag as spam</span>
                     </a>
 
-                    if (topicAuthor != null && Model.ForumNewTopicsAllowed)
+                    if (forum.NewTopicsAllowed())
                     {
-                        <a href="#" data-author="@topicAuthor.Member.Name" data-topic="@Model.Id" data-controller="comment" class="reply forum-reply">
+                        <a href="#" data-author="@topicAuthor.Name" data-topic="@Model.Id" data-controller="comment" class="reply forum-reply">
                             <i class="icon-Reply-arrow"></i><span>Reply</span>
                         </a>
                     }
 
-                    if (topicAuthor != null && (memberIsAdmin || currentMemberIsAuthor))
+                    if (Members.IsAdmin() || Members.GetCurrentMember().Id == topicAuthor.Id)
                     {
                         <a href="#" class="edit-post" data-id="@Model.Id" data-controller="topic">
                             <i class="icon-Edit"></i><span>Edit</span>
@@ -166,7 +122,7 @@
                         </a>
                     }
 
-                    if (memberIsAdmin)
+                    if (Members.IsAdmin())
                     {
                         if (Model.IsSpam)
                         {
@@ -187,6 +143,7 @@
                     <i class="icon-Link"></i><span>Copy Link</span>
                 </a>
             </div>
-        </li> <!-- End of question -->
+        </li>
+        <!-- End of question -->
     }
 }

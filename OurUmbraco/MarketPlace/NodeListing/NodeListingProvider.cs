@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
-using Examine;
 using OurUmbraco.MarketPlace.Extensions;
 using OurUmbraco.MarketPlace.Interfaces;
 using OurUmbraco.MarketPlace.Providers;
@@ -10,7 +9,6 @@ using OurUmbraco.Our;
 using OurUmbraco.Wiki.Extensions;
 using umbraco;
 using umbraco.BusinessLogic;
-using Umbraco.Core;
 using Umbraco.Core.Models;
 using Umbraco.Web;
 
@@ -25,13 +23,13 @@ namespace OurUmbraco.MarketPlace.NodeListing
         /// <param name="optimized"></param>
         /// <param name="projectKarma"></param>
         /// <returns></returns>
-        public IListingItem GetListing(int id, bool optimized = false)
+        public IListingItem GetListing(int id, bool optimized = false, int projectKarma = -1)
         {
             var umbracoHelper = new UmbracoHelper(UmbracoContext.Current);
             var content = umbracoHelper.TypedContent(id);
 
             if (content != null)
-                return GetListing(content, optimized);
+                return GetListing(content, optimized, projectKarma);
 
             throw new NullReferenceException("Content is Null cannot find a node with the id:" + id);
         }
@@ -72,19 +70,19 @@ namespace OurUmbraco.MarketPlace.NodeListing
         /// <param name="optimized">if set performs less DB interactions to increase speed.</param>
         /// <param name="projectKarma"></param>
         /// <returns></returns>
-        public IListingItem GetListing(IPublishedContent content, bool optimized = false, int? projectKarma = null)
+        public IListingItem GetListing(IPublishedContent content, bool optimized = false, int projectKarma = -1)
         {
             if (content == null) throw new ArgumentNullException("content");
 
             //TODO: could easily cache this for a short period of time
 
             var listingItem = new ListingItem.PublishedContentListingItem(content);
-
+            
             //this section was created to speed up loading operations and cut down on the number of database interactions
             // TODO: N+1+1+1+1, etc...
             if (optimized == false)
             {
-                listingItem.Karma = projectKarma ?? GetProjectKarma(content.Id);
+                listingItem.Karma = projectKarma < 0 ? GetProjectKarma(content.Id) : projectKarma;
                 listingItem.Downloads = GetProjectDownloadCount(content.Id);
                 listingItem.DocumentationFile = GetMediaForProjectByType(content.Id, FileType.docs);
                 listingItem.ScreenShots = GetMediaForProjectByType(content.Id, FileType.screenshot);
@@ -101,10 +99,8 @@ namespace OurUmbraco.MarketPlace.NodeListing
         {
             try
             {
-                using (var sqlHelper = Application.SqlHelper)
-                {
-                    return sqlHelper.ExecuteScalar<int>("select count(*) from projectDownload where projectId = @id;", sqlHelper.CreateParameter("@id", projectId));
-                }
+                return Application.SqlHelper.ExecuteScalar<int>(" select count(*) from projectDownload where projectId = @id;",
+                    Application.SqlHelper.CreateParameter("@id", projectId));
             }
             catch
             {
@@ -114,12 +110,13 @@ namespace OurUmbraco.MarketPlace.NodeListing
 
         public int GetProjectKarma(int projectId)
         {
-            using (var sqlHelper = Application.SqlHelper)
-            using (var reader = sqlHelper.ExecuteReader("SELECT SUM([points]) AS Karma FROM powersProject WHERE id = @projectId", sqlHelper.CreateParameter("@projectId", projectId)))
-            {
+
+            using (var reader = Application.SqlHelper.ExecuteReader("SELECT SUM([points]) AS Karma FROM powersProject WHERE id = @projectId",
+                    Application.SqlHelper.CreateParameter("@projectId", projectId)))
                 if (reader.Read())
+                {
                     return reader.GetInt("Karma");
-            }
+                }
 
             return 0;
         }
@@ -136,15 +133,16 @@ namespace OurUmbraco.MarketPlace.NodeListing
         /// <param name="listingItem"></param>
         public void SaveOrUpdate(IListingItem listingItem)
         {
-            var contentService = ApplicationContext.Current.Services.ContentService;
+            var contentService = UmbracoContext.Current.Application.Services.ContentService;
             //check if this is a new listing or an existing one.
             var isUpdate = listingItem.Id != 0;
             var content = (isUpdate)
                 ? contentService.GetById(listingItem.Id)
                 : contentService.CreateContent(listingItem.Name, listingItem.CategoryId, "Project");
 
+            Guid packageGuid;
             var packageGuidValue = content.GetValue<string>("packageGuid");
-            var packageGuidString = Guid.TryParse(packageGuidValue, out Guid packageGuid)
+            var packageGuidString = Guid.TryParse(packageGuidValue, out packageGuid)
                 ? packageGuid.ToString()
                 : Guid.NewGuid().ToString();
 
@@ -162,19 +160,15 @@ namespace OurUmbraco.MarketPlace.NodeListing
             content.SetValue("licenseUrl", listingItem.LicenseUrl);
             content.SetValue("supportUrl", listingItem.SupportUrl);
             content.SetValue("sourceUrl", listingItem.SourceCodeUrl);
-            content.SetValue("nuGetPackageUrl", listingItem.NuGetPackageUrl);
             content.SetValue("demoUrl", listingItem.DemonstrationUrl);
             content.SetValue("openForCollab", listingItem.OpenForCollab);
             content.SetValue("notAPackage", listingItem.NotAPackage);
             content.SetValue("packageGuid", packageGuidString);
             content.SetValue("approved", (listingItem.Approved) ? "1" : "0");
-            if(isUpdate == false)
-                content.SetValue("termsAgreementDate", listingItem.TermsAgreementDate);
+            content.SetValue("termsAgreementDate", listingItem.TermsAgreementDate);
             content.SetValue("owner", listingItem.VendorId);
             content.SetValue("websiteUrl", listingItem.ProjectUrl);
             content.SetValue("licenseKey", listingItem.LicenseKey);
-            content.SetValue("isRetired", listingItem.IsRetired);
-            content.SetValue("retiredMessage", listingItem.RetiredMessage);
 
             if (listingItem.PackageFile != null)
             {
@@ -218,17 +212,10 @@ namespace OurUmbraco.MarketPlace.NodeListing
                 }
             }
 
-            if (listingItem.IsRetired)
-                listingItem.Live = false;
-
             contentService.SaveAndPublishWithStatus(content);
 
             listingItem.Id = content.Id;
             listingItem.NiceUrl = library.NiceUrl(listingItem.Id);
-
-            var indexer = ExamineManager.Instance.IndexProviderCollection["projectIndexer"];
-            if(indexer != null && listingItem.IsRetired)
-                indexer.DeleteFromIndex(listingItem.Id.ToString());
         }
 
 
@@ -273,21 +260,17 @@ namespace OurUmbraco.MarketPlace.NodeListing
             var umbracoHelper = new UmbracoHelper(UmbracoContext.Current);
             var contribProjects = new List<IPublishedContent>();
             const string sql = @"SELECT * FROM projectContributors WHERE memberId=@memberId";
-            var contribPackageIds = ApplicationContext.Current.DatabaseContext.Database.Fetch<int>(sql, new { memberId });
+            var contribPackageIds = UmbracoContext.Current.Application.DatabaseContext.Database.Fetch<int>(sql, new { memberId });
 
             foreach (var contribPackageId in contribPackageIds)
             {
-                var contribPackage = umbracoHelper.TypedContent(contribPackageId);
-                if (contribPackage != null)
-                {
-                    contribProjects.Add(contribPackage);
-                }
+                contribProjects.Add(umbracoHelper.TypedContent(contribPackageId));
             }
 
             var listings = new List<IListingItem>();
             foreach (var contribItem in contribProjects)
             {
-                listings.Add(GetListing(contribItem.Id, optimized));
+                listings.Add(GetListing(contribItem.Id, optimized, -1));
             }
 
             return listings;

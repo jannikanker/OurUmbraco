@@ -389,12 +389,12 @@ Umbraco.Sys.registerNamespace("Umbraco.Controls");
                             processData: false,
                             success: function (data, textStatus) {
                                 if (textStatus == "error") {
-                                    alert("Could not update sort order");
+                                    alert("Oops. Could not update sort order");
                                     self._getChildNodes();
                                 }
                             },
                             error: function(data) {
-                                alert("Could not update sort order. Err: " + data.statusText);
+                                alert("Oops. Could not update sort order. Err: " + data.statusText);
                                 self._getChildNodes();
                             }
                         });

@@ -1,5 +1,5 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" Inherits="System.Web.UI.UserControl" %>
-<%@ Import Namespace="OurUmbraco.Documentation" %>
+<%@ Import Namespace="OurUmbraco.Documentation.Busineslogic.GithubSourcePull" %>
 
 <script runat="server">
 
@@ -14,8 +14,7 @@
     
     void GetDocsButton_Click(object sender, EventArgs e)
     {
-        var docsUpdater = new DocumentationUpdater();
-        docsUpdater.EnsureGitHubDocs();
+        ZipDownloader.EnsureGitHubDocs(true);
         Status = "Done!";
     }
 

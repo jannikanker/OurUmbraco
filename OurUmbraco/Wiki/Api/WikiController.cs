@@ -2,7 +2,6 @@
 using System.Web.Http;
 using OurUmbraco.Wiki.BusinessLogic;
 using OurUmbraco.Wiki.Library;
-using umbraco.BusinessLogic;
 using umbraco.cms.businesslogic.web;
 using Umbraco.Web.WebApi;
 
@@ -162,13 +161,10 @@ namespace OurUmbraco.Wiki.Api
         [HttpGet]
         public void ClearHelpRequests(string section, string applicationPage)
         {
-            using (var sqlHelper = Application.SqlHelper)
-            {
-                sqlHelper.ExecuteNonQuery(
-                    "Delete from wikiHelpRequest where section = @section and applicationPage = @applicationPage",
-                    sqlHelper.CreateParameter("@section", section),
-                    sqlHelper.CreateParameter("@applicationPage", applicationPage));
-            }
+            Data.SqlHelper.ExecuteNonQuery(
+             "Delete from wikiHelpRequest where section = @section and applicationPage = @applicationPage",
+             Data.SqlHelper.CreateParameter("@section", section),
+             Data.SqlHelper.CreateParameter("@applicationPage", applicationPage));
         }
     }
 }

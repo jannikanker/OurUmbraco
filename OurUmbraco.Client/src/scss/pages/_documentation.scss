@@ -1,6 +1,6 @@
 .documentation {
     padding: 0;
-
+ 
 
     > .container {
         position: relative;
@@ -9,7 +9,7 @@
 
     #body a {
         color: darken($color-our, 20%);
-
+    
 
         &:hover {
             text-decoration: underline;
@@ -24,26 +24,29 @@
     #github-link {
         line-height: 1rem;
         vertical-align: middle;
-        margin: 0.5rem;
-
-        i {
-            margin-right: 5px;
+        transition: border-color .1s $easeExpo, color .1s $easeExpo;
+        
+        &:before {
+            content: "";
+            display: inline-block;
+            width: 22px;
+            height: 18px;
+            vertical-align: sub;
+            background-image: url("/Assets/images/GitHub-Mark-32px.png");
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: .7;
+            transition: opacity .1s $easeExpo; 
         }
-
-        @media (min-width:$md) {
-            float: right;
+        
+        &:hover {
+            border-color: black;
+            
+            &:before {
+                opacity: 1;
+            }
         }
-    }
-
-    #github-issue-link {
-        line-height: 1rem;
-        vertical-align: middle;
-        margin: 0.5rem;
-
-        i {
-            margin-right: 5px;
-        }
-
+        
         @media (min-width:$md) {
             float: right;
         }
@@ -151,7 +154,7 @@
     
     a {
         color: darken($color-our, 20%);
-        font-weight: bold;
+        text-decoration: none;
 
         &:hover {
             color: darken($color-our, 40%);
@@ -359,7 +362,7 @@ $color-overview: lighten($color-our, 20%);
 
 
 
-    .col-xs-6, .col-sm-6 {
+    .col-xs-6 {
         min-height: 133px;
 
 

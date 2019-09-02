@@ -1,84 +1,106 @@
-@using System.Configuration
+@using OurUmbraco.Our
 @using OurUmbraco.Our.Controllers
-@using reCAPTCHA.MVC
-@inherits UmbracoViewPage<OurUmbraco.Our.Models.RegisterModel>
+@inherits Umbraco.Web.Mvc.UmbracoViewPage<OurUmbraco.Our.Models.RegisterModel>
 @{
     Html.EnableClientValidation(true);
     Html.EnableUnobtrusiveJavaScript(true);
-    var apiKey = ConfigurationManager.AppSettings["GoogleServerKey"];
 }
 
+
+<div id="update-avatar-dialog" class="community-dialog">
+    <div>
+        <p><b>Upload avatar</b></p>
+        <p class="invalid-file">The select file type is invalid. File must be gif, png, jpg, jpeg.</p>
+        <input type="file" name="file" id="file" data-action="/umbraco/api/community/imageupload" />
+        <div style="text-align:center;">
+            <button class="button transparent tiny">Cancel<div class="span" style="display:none;"><div class=" loader"></div></div></button>
+        </div>
+    </div>
+
+</div>
+
 <div class="profile-settings">
-    <p>We just need some basic information from you:</p>
-    <div id="registrationForm" class="profile-settings-forms">
+    <strong>Your details</strong>
+    <div class="profile-settings-forms">
 
         @using (Html.BeginUmbracoForm<RegisterController>("HandleSubmit"))
         {
             @Html.ValidationSummary(true)
             @Html.AntiForgeryToken()
 
+            <div class="avatar" id="avatar">
+                <label for="avatar">
+                    Avatar
+                </label>
+
+                <div class="avatar-image inked">
+                    @if (Model.Avatar != null)
+                    {
+                        @Html.Raw(Utils.GetLocalAvatar(Model.Avatar ?? "", 100, ""))
+                    }
+                    else
+                    {
+                        @Html.Raw(Utils.GetLocalAvatar("/media/avatar/default.gif", 100, "Umbraco Logo"))
+                    }
+                    <span>Change image</span>
+                </div>
+                @Html.HiddenFor(m => m.Avatar)
+                @Html.ValidationMessageFor(m => m.Avatar)
+            </div>
+
             <div class="profile-input" id="username">
                 @Html.LabelFor(m => m.Name)
-                @Html.ValidationMessageFor(m => m.Name)
                 @Html.TextBoxFor(m => m.Name)
+                @Html.ValidationMessageFor(m => m.Name)
             </div>
 
 
             <div class="profile-input" id="email">
                 @Html.LabelFor(m => m.Email)
-                @Html.ValidationMessageFor(m => m.Email)
                 @Html.TextBoxFor(m => m.Email)
+                @Html.ValidationMessageFor(m => m.Email)
+
             </div>
 
 
             <div class="profile-input" id="password">
                 @Html.LabelFor(m => m.Password)
-                @Html.ValidationMessageFor(m => m.Password)
                 @Html.PasswordFor(m => m.Password, new { @class = "password-input" })
+                @Html.ValidationMessageFor(m => m.Password)
             </div>
+
+            <div class="profile-input confirm-password" id="repeat-password">
+                @Html.LabelFor(m => m.RepeatPassword)
+                @Html.PasswordFor(m => m.RepeatPassword, new { @class = "password-input" })
+                @Html.ValidationMessageFor(m => m.Password)
+
+            </div>
+
+
+            <div class="profile-input" id="bio">
+                @Html.LabelFor(m => m.Bio)
+                @Html.TextAreaFor(m => m.Bio)
+
+            </div>
+
 
             <div class="profile-input" id="twitter-alias">
                 @Html.LabelFor(m => m.TwitterAlias)
-                <em>Are you on Twitter? We have an active Twitter community. Follow the <a href="https://twitter.com/search?f=tweets&vertical=default&q=umbraco&src=typd" target="_blank">umbraco search term</a> and join the conversation.</em>
                 @Html.TextBoxFor(m => m.TwitterAlias)
             </div>
 
-            <div class="profile-input" id="github-alias">
-                @Html.LabelFor(m => m.GitHubUsername)
-                <em>We'd love to show off your GitHub contributions to the community.</em>
-                @Html.TextBoxFor(m => m.GitHubUsername)
-            </div>
 
             <div class="profile-input" id="located-at">
                 @Html.LabelFor(m => m.Location)
-                <em>When your location is displayed correctly on the map below, enough information has been provided.</em>
-                @Html.HiddenFor(m => m.Location)
-                @Html.HiddenFor(m => m.Latitude)
-                @Html.HiddenFor(m => m.Longitude)
-                <div id="map"></div>
-                <input id="pac-input" class="controls" type="text" placeholder="Search for your location">
+                @Html.TextBoxFor(m => m.Location)
             </div>
 
-            <div class="profile-input" id="personal">
-                @Html.HiddenFor(m => m.Flickr)
-                @Html.HiddenFor(m => m.Bio)
-            </div>
 
-            <div class="profile-input" id="terms-conditions">
-                @Html.CheckBoxFor(m => m.AgreeTerms) <label for="AgreeTerms"><em>I agree to the <a href="/code-of-conduct" target="_blank">code of conduct</a> and <a href="/privacy-policy" target="_blank">privacy policy</a> for using the Our Umbraco website.</em></label>
-                @Html.ValidationMessageFor(m => m.AgreeTerms)
-            </div>
-            
-            <div class="profile-input" id="recaptcha">
-                @Html.Recaptcha()
-                @Html.ValidationMessage("ReCaptcha")
-            </div>
+            <input class="button green" type="submit" value="Register">
 
-            <input class="button green" type="submit" value="Sign up">
         }
+
     </div>
 </div>
 
-<script type="text/javascript" src="/scripts/register.js"></script>
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=@(apiKey)&libraries=places&callback=initAutocomplete"></script>
-<link rel="stylesheet" type="text/css" href="/css/register.css" />
+

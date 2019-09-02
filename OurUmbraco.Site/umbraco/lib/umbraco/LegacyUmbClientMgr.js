@@ -150,8 +150,7 @@ Umbraco.Sys.registerNamespace("Umbraco.Application");
                             sourceUrl: currentMenuNode.childNodesUrl,
                             updateDefinition: function() {
                                 throw "'updateDefinition' method is not supported in Umbraco 7, consider upgrading to the new v7 APIs";
-                            },
-                            expanded: currentMenuNode.expanded === true
+                            }
                         };
                         //defined getters that will throw a not implemented/supported exception
                         Object.defineProperty(legacyNode, "menu", {
@@ -180,7 +179,7 @@ Umbraco.Sys.registerNamespace("Umbraco.Application");
                 var injector = getRootInjector();
                 var navService = injector.get("navigationService");
                 var localizationService = injector.get("localizationService");
-                var usersResource = injector.get("usersResource");
+                var userResource = injector.get("userResource");                
                 //var appState = injector.get("appState");
                 var angularHelper = injector.get("angularHelper");
                 var $rootScope = injector.get("$rootScope");
@@ -195,7 +194,7 @@ Umbraco.Sys.registerNamespace("Umbraco.Application");
                             if (currentMenuNode) {
                                 if (confirm(txtConfirmDisable + ' "' + UmbClientMgr.mainTree().getActionNode().nodeName + '"?\n\n')) {
                                     angularHelper.safeApply($rootScope, function () {
-                                        usersResource.disableUsers(currentMenuNode.nodeId).then(function () {
+                                        userResource.disableUser(currentMenuNode.nodeId).then(function () {
                                             UmbClientMgr.mainTree().syncTree("-1," + currentMenuNode.nodeId, true);
                                         });
                                     });
@@ -363,28 +362,10 @@ Umbraco.Sys.registerNamespace("Umbraco.Application");
                 return getRootScope();
             },
 
-            /**
-            This will reload the content frame based on it's current route, if pathToMatch is specified it will only reload it if the current
-            location matches the path
-            */
-            reloadLocation: function(pathToMatch) {
-
+            reloadLocation: function() {
                 var injector = getRootInjector();
-                var doChange = true;
-                if (pathToMatch) {
-                    var $location = injector.get("$location");
-                    var path = $location.path();
-                    if (path != pathToMatch) {
-                        doChange = false;
-                    }
-                }
-
-                if (doChange) {
-                    var $route = injector.get("$route");
-                    $route.reload();
-                    var $rootScope = injector.get("$rootScope");
-                    $rootScope.$apply();
-                }
+                var $route = injector.get("$route");
+                $route.reload();
             },
             
             closeModalWindow: function(rVal) {

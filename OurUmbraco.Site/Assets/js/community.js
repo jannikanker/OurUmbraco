@@ -112,10 +112,6 @@
                 $("#forum-title").val("");
                 $("#forum-description").val("");
             });
-        },
-        
-        getTopicDataByWeek: function () {
-          return $.get("/umbraco/api/Statistics/GetTopicDataByWeek");
         }
     };
 }();
@@ -406,7 +402,7 @@ $(function () {
             $file.show();
 
             if (response.success) {
-                $(".avatar-image img", $(".profile-settings-forms")).attr("src", response.imagePath + "?width=100&height=100&mode=crop");
+                $("img", $(".profile-settings-forms")).attr("src", response.imagePath + "?width=100&height=100&mode=crop");
                 $("#Avatar", $(".profile-settings-forms")).val(response.imagePath);
                 $body.removeClass("active uploading-image");
             } else {

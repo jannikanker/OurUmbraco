@@ -10,7 +10,6 @@ using OurUmbraco.Documentation.Models;
 using Umbraco.Web.Mvc;
 using Umbraco.Web.WebApi;
 using System.IO.Compression;
-using Newtonsoft.Json;
 using Umbraco.Core.Logging;
 
 namespace OurUmbraco.Documentation.Controllers
@@ -23,22 +22,10 @@ namespace OurUmbraco.Documentation.Controllers
         public async Task<HttpResponseMessage> Update(DocFxUpdateModel model)
         {
             var job = model.eventData.jobs.FirstOrDefault();
-            if (job == null)
-            {
-                const string errorMessage = "No job found in payload";
-                var input = JsonConvert.SerializeObject(model.eventData);
-                LogHelper.Warn<DocFxUpdateModel>(string.Format("{0} - input was: {1}", errorMessage, input));
-                throw new FormatException(errorMessage);
-            }
+            if (job == null) throw new FormatException("No job found in payload");
 
             var artifacts = job.artifacts;
-            if (artifacts == null)
-            {
-                const string errorMessage = "No artifacts found in payload";
-                var input = JsonConvert.SerializeObject(job);
-                LogHelper.Warn<DocFxUpdateModel>(string.Format("{0} - input was: {1}", errorMessage, input));
-                throw new FormatException(errorMessage);
-            }
+            if (artifacts == null) throw new FormatException("No artifacts found in payload");
 
             LogHelper.Info<DocFxUpdateModel>(string.Format("Found {0} artifacts in the notification", artifacts.Length));
 

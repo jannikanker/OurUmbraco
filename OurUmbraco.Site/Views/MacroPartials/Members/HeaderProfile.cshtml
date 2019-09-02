@@ -1,17 +1,10 @@
-﻿@using OurUmbraco.Community.People
+﻿@using OurUmbraco.Forum.Extensions
 @inherits Umbraco.Web.Macros.PartialViewMacroPage
 
-@if (Members.IsLoggedIn())
-{
-    var currentMember = Members.GetCurrentMember();
-    var avatarService = new AvatarService();
-    var img = avatarService.GetImgWithSrcSet(currentMember, currentMember.Name, 100);
-
+@if(Members.IsLoggedIn()){
     <div class="user">
-        @Html.Raw(img);
+        <img src="@Members.GetCurrentMember().Avatar()" alt="">
     </div>
-}
-else
-{
-    <a href="/members/login">Sign in</a> <a href="/members/register">Register</a>
+}else{
+    <a href="/members/login">Sign in</a>  <a href="/members/register">Register</a>   
 }

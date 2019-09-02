@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace OurUmbraco.Repository.Models
 {
@@ -28,13 +27,18 @@ namespace OurUmbraco.Repository.Models
 
         public string Category { get; set; }
 
-        /// <summary>
-        /// The latest version of this package
-        /// </summary>
         public string LatestVersion { get; set; }
 
         public PackageOwnerInfo OwnerInfo { get; set; }
-        
+
+        /// <summary>
+        /// This is the minimum Umbraco version that this package supports
+        /// </summary>
+        /// <remarks>
+        /// This could be null if it is a legacy package
+        /// </remarks>
+        public string MinimumVersion { get; set; }
+
         public long Score { get; set; }
     }
 }

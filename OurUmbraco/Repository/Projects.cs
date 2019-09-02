@@ -352,12 +352,9 @@ namespace OurUmbraco.Repository
 
             if (xpn.MoveNext())
             {
-                var xmlNode = xpn.Current as IHasXmlNode;
-                if (xmlNode != null)
+                if (xpn.Current is IHasXmlNode)
                 {
-                    //This will get the latest marked file id
-
-                    Node node = new Node(xmlNode.GetNode());
+                    Node node = new Node(((IHasXmlNode)xpn.Current).GetNode());
                     string fileId = safeProperty(node, "file");
                     int _id;
 

@@ -1,42 +1,33 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace OurUmbraco.Our.Models
 {
     public class RegisterModel
     {
-        [Required(ErrorMessage = "Please enter your name")]
-        [DisplayName("Name*")]
+        [Required]
+        public string Avatar { get; set; }
+
+        [Required]
         public string Name { get; set; }
 
-        [Required (ErrorMessage = "Please enter a valid email address")]
+        [Required]
         [EmailAddress]
-        [DisplayName("Email*")]
         public string Email { get; set; }
 
-        [Required (ErrorMessage = "Please enter a password")]
-        [DisplayName("Password*")]
+        [Required]
         public string Password { get; set; }
-        
+
+        [Required]
+        [Display(Name = "Confirm")]
+        [Compare("Password")]
+        public string RepeatPassword { get; set; }
+
         public string Company { get; set; }
-        
-        [DisplayName("Twitter alias")]
-        public string TwitterAlias { get; set; }
-
-        [DisplayName("GitHub username")]
-        public string GitHubUsername { get; set; }
-        
-        [DisplayName("Where do you live?")]
-        public string Location { get; set; }
-
-        public string Longitude { get; set; }
-
-        public string Latitude { get; set; }
-        
-        public bool AgreeTerms { get; set; }
-
-        public string Flickr { get; set; }
 
         public string Bio { get; set; }
+
+        public string TwitterAlias { get; set; }
+
+        public string Location { get; set; }
     }
 }

@@ -15,6 +15,7 @@ using OurUmbraco.Forum.Services;
 using umbraco.BusinessLogic;
 using Umbraco.Core;
 using Umbraco.Core.Models;
+using Umbraco.Web;
 
 namespace OurUmbraco.Forum.AntiSpam
 {
@@ -38,7 +39,7 @@ namespace OurUmbraco.Forum.AntiSpam
                 var reputationCurrent = member.GetValue<int>("reputationCurrent");
                 member.SetValue("reputationCurrent", reputationCurrent >= 0 ? reputationCurrent - 1 : 0);
 
-                var memberService = ApplicationContext.Current.Services.MemberService;
+                var memberService = UmbracoContext.Current.Application.Services.MemberService;
                 memberService.Save(member);
                 memberService.AssignRole(member.Id, "potentialspam");
             }
@@ -57,6 +58,19 @@ namespace OurUmbraco.Forum.AntiSpam
                 post = post + string.Format("Go to member http://our.umbraco.org/member/{0}\n\n", memberId);
 
                 var body = string.Format("The following forum post was marked as spam by the spam system, if this is incorrect make sure to mark it as ham.\n\n{0}", post);
+
+                if (memberId != 0)
+                {
+                    var member = ApplicationContext.Current.Services.MemberService.GetById(memberId);
+
+                    if (member != null)
+                    {
+                        var querystring = string.Format("api?ip={0}&email={1}&f=json", Utils.GetIpAddress(), HttpUtility.UrlEncode(member.Email));
+                        body = body + string.Format("Check the StopForumSpam rating: http://api.stopforumspam.org/{0}", querystring);
+                    }
+                    
+                }
+
                 body = body.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
 
                 var values = new NameValueCollection

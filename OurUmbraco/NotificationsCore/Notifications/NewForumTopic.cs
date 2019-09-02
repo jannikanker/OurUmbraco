@@ -68,7 +68,7 @@ namespace OurUmbraco.NotificationsCore.Notifications
 
                             var body = _details.SelectSingleNode("//body").InnerText;
                             body = string.Format(body, forum.Name, "https://" + domain + url, memberName, topic.Title,
-                                HttpUtility.HtmlDecode(topic.Body.StripHtml()));
+                                HttpUtility.HtmlDecode(umbraco.library.StripHtml(topic.Body)));
 
                             var mailMessage = new MailMessage
                             {

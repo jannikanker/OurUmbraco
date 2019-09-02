@@ -14,16 +14,13 @@ namespace OurUmbraco.Our.CustomHandlers
 
 		void Action_BeforePerform(object sender, ActionEventArgs e)
 		{
-			var action = (Action)sender;
-            
-		    if (action.Alias != "ExternalVote")
-                return;
+			Action a = (Action)sender;
 
-		    using (var sqlHelper = Application.SqlHelper)
-		    {
-		        var memberId = sqlHelper.ExecuteScalar<int>("SELECT memberId FROM externalUrls WHERE (@id = id)", sqlHelper.CreateParameter("@id", e.ItemId));
-		        e.ReceiverId = memberId;
-		    }
+			if (a.Alias == "ExternalVote")
+			{
+				var memberId = OurUmbraco.Powers.BusinessLogic.Data.SqlHelper.ExecuteScalar<int>("SELECT memberId FROM externalUrls WHERE (@id = id)", OurUmbraco.Powers.BusinessLogic.Data.SqlHelper.CreateParameter("@id", e.ItemId));
+				e.ReceiverId = memberId;
+			}
 		}
 	}
 }

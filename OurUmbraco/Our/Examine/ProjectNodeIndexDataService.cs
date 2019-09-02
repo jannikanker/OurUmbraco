@@ -9,9 +9,7 @@ using Examine.LuceneEngine;
 using Examine.LuceneEngine.Providers;
 using Lucene.Net.Documents;
 using OurUmbraco.Project;
-using OurUmbraco.Repository.Services;
 using OurUmbraco.Wiki.BusinessLogic;
-using OurUmbraco.Wiki.Models;
 using umbraco;
 using Umbraco.Core;
 using Umbraco.Core.Configuration;
@@ -24,24 +22,18 @@ using Umbraco.Web.Security;
 
 namespace OurUmbraco.Our.Examine
 {
+
     /// <summary>
     /// Data service used for projects
     /// </summary>
     public class ProjectNodeIndexDataService : ISimpleDataService
     {
-        
-
-        public SimpleDataSet MapProjectToSimpleDataIndexItem(
-            IDictionary<int, MonthlyProjectDownloads> projectDownloadStats,
-            DateTime mostRecentUpdateDate,
-            IPublishedContent project, SimpleDataSet simpleDataSet, string indexType,
+        public SimpleDataSet MapProjectToSimpleDataIndexItem(IPublishedContent project, SimpleDataSet simpleDataSet, string indexType,
             int projectVotes, WikiFile[] files, int downloads, IEnumerable<string> compatVersions)
         {
             var isLive = project.GetPropertyValue<bool>("projectLive");
             var isApproved = project.GetPropertyValue<bool>("approved");
 
-            var strictPackageFiles = PackageRepositoryService.GetAllStrictSupportedPackageVersions(files);
-            
             simpleDataSet.NodeDefinition.NodeId = project.Id;
             simpleDataSet.NodeDefinition.Type = indexType;
 
@@ -73,30 +65,49 @@ namespace OurUmbraco.Our.Examine
             // so we have to do all of this parsing.
             var version = project.GetPropertyValue<string>("compatibleVersions") ?? string.Empty;
             var cleanedVersions = version.ToLower()
+                .Replace("nan", "")
+                .Replace("saved", "")
+                .Replace("v", "")
+                .Trim(',')
                 .Split(',')
-                .Select(x => x.Trim().GetFromUmbracoString(reduceToConfigured:false))
+                //it's stored as an int like 721 (for version 7.2.1)
+                .Where(x => x.Length <= 3 && x.Length > 0)
+                //pad it out to 3 digits
+                .Select(x => x.PadRight(3, '0'))
+                .Select(x =>
+                {
+                    int o;
+                    if (int.TryParse(x, out o))
+                    {
+                        //if it ends with '0', that means it's a X.X.X version
+                        // if it does not end with '0', that means that the last 2 digits are the 
+                        // Minor part of the version
+                        return x.EndsWith("0")
+                            ? string.Format("{0}.{1}.{2}", x[0], x[1], 0)
+                            : string.Format("{0}.{1}.{2}", x[0], x.Substring(1), 0);
+                    }
+                    return null;
+                })
                 .Where(x => x != null);
 
-            var cleanedCompatVersions = compatVersions
-                .Select(x => x.GetFromUmbracoString(reduceToConfigured: false))
-                .Where(x => x != null);
-            
-            var hasForum = project.Children.Any(x => x.IsVisible());
+            var cleanedCompatVersions = compatVersions.Select(x => x.Replace("nan", "")
+                .Replace("saved", "")
+                .Replace("nan", "")
+                .Replace("v", "")
+                .Replace(".x", "")
+                .Trim(','));
 
-            MonthlyProjectDownloads projStats = null;
-            projectDownloadStats.TryGetValue(project.Id, out projStats);
+            //popularity for sorting number = downloads + karma * 100;
+            //TODO: Change score so that we take into account:
+            // - recently updated
+            // - works on latest umbraco versions
+            // - works on uaas
+            // - has a forum
+            // - has source code link
+            // - open for collab / has collaborators
+            // - download count in a recent timeframe - since old downloads should count for less
 
-            var points = new ProjectPopularityPoints(                
-                mostRecentUpdateDate,
-                projStats,
-                project.CreateDate, 
-                project.UpdateDate,
-                project.GetPropertyValue<bool>("worksOnUaaS"), hasForum,
-                project.GetPropertyValue<string>("sourceUrl").IsNullOrWhiteSpace() == false,
-                project.GetPropertyValue<bool>("openForCollab"),
-                downloads, 
-                projectVotes);
-            var pop = points.Calculate();
+            var pop = downloads + (projectVotes * 100);
 
             simpleDataSet.RowData.Add("popularity", pop.ToString());
             simpleDataSet.RowData.Add("karma", projectVotes.ToString());
@@ -115,8 +126,6 @@ namespace OurUmbraco.Our.Examine
             //then we index the versions that the project has actually been flagged as compatible against
             simpleDataSet.RowData.Add("compatVersions", string.Join(",", cleanedCompatVersions));
 
-            simpleDataSet.RowData.Add("minimumVersionStrict", string.Join(",", strictPackageFiles.Select(x => x.MinUmbracoVersion.ToString(3))));
-
             return simpleDataSet;
         }
 
@@ -129,10 +138,8 @@ namespace OurUmbraco.Our.Examine
             var allProjectIds = projects.Select(x => x.Id).ToArray();
             var allProjectKarma = Utils.GetProjectTotalVotes();
             var allProjectWikiFiles = WikiFile.CurrentFiles(allProjectIds);
-            var allProjectDownloads = Utils.GetProjectTotalPackageDownload();
+            var allProjectDownloads = Utils.GetProjectTotalDownload();
             var allCompatVersions = Utils.GetProjectCompatibleVersions();
-            var mostRecentDownloadDate = WikiFile.GetMostRecentDownloadDate();
-            var downloadStats = WikiFile.GetMonthlyDownloadStatsByProject(mostRecentDownloadDate.Subtract(TimeSpan.FromDays(365)));            
 
             foreach (var project in projects)
             {
@@ -145,10 +152,7 @@ namespace OurUmbraco.Our.Examine
                 var projectFiles = allProjectWikiFiles.ContainsKey(project.Id) ? allProjectWikiFiles[project.Id].ToArray() : new WikiFile[] { };
                 var projectVersions = allCompatVersions.ContainsKey(project.Id) ? allCompatVersions[project.Id] : Enumerable.Empty<string>();
 
-                yield return MapProjectToSimpleDataIndexItem(
-                    downloadStats,
-                    mostRecentDownloadDate,                    
-                    project, simpleDataSet, indexType, projectKarma, projectFiles, projectDownloads, projectVersions);
+                yield return MapProjectToSimpleDataIndexItem(project, simpleDataSet, indexType, projectKarma, projectFiles, projectDownloads, projectVersions);
             }
         }
 
@@ -179,7 +183,7 @@ namespace OurUmbraco.Our.Examine
             foreach (var numericalVersion in numericalVersions)
             {
                 //don't store, we're just using this to search
-                var versionField = new NumericField(fieldName, Field.Store.YES, true).SetLongValue(numericalVersion);
+                var versionField = new NumericField(fieldName, Field.Store.NO, true).SetLongValue(numericalVersion);
                 e.Document.Add(versionField);
             }
         }
@@ -202,43 +206,46 @@ namespace OurUmbraco.Our.Examine
                 //remove the current version field from the lucene doc
                 e.Document.RemoveField("body");
                 //add a 'body' field with stripped html
-                e.Document.Add(new Field("body", e.Fields["body"].StripHtml(), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.YES));
+                e.Document.Add(new Field("body", library.StripHtml(e.Fields["body"]), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.YES));
             }
 
-            var allVersions = new HashSet<string>();
-
-            //each of these contains versions, we want to parse them all into one list and then ensure each of these
-            //fields are not analyzed (just stored since we dont use them for searching)
-            var delimitedVersionFields = new[] {"versions", "minimumVersionStrict", "compatVersions"};
-
-            foreach (var fieldName in delimitedVersionFields)
+            //If there is a versions field, we'll split it and index the same field on each version
+            if (e.Fields.ContainsKey("versions"))
             {
-                //If there is a versions field, we'll split it and index the same field on each version
-                if (e.Fields.ContainsKey(fieldName))
+                //split into separate versions
+                var versions = e.Fields["versions"].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                AddNumericalVersionValue(e, "num_versions", versions);
+
+                //remove the current version field from the lucene doc
+                e.Document.RemoveField("versions");
+
+                foreach (var version in versions)
                 {
-                    //split into separate versions
-                    var versions = e.Fields[fieldName].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-                    foreach (var version in versions)
-                    {
-                        allVersions.Add(version);
-                    }
-                    
-                    //remove the current version field from the lucene doc
-                    e.Document.RemoveField(fieldName);
-
-                    foreach (var version in versions)
-                    {
-                        //add a 'versions' field for each version (same field name but different values)
-                        //not analyzed, we don't use this for searching
-                        e.Document.Add(new Field(fieldName, version, Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS, Field.TermVector.NO));
-                    }
+                    //add a 'versions' field for each version (same field name but different values)
+                    //not analyzed, we don't use this for searching
+                    e.Document.Add(new Field("versions", version, Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS, Field.TermVector.NO));
                 }
             }
 
-            //now add all versions to a numerical field
-            AddNumericalVersionValue(e, "num_version", allVersions.ToArray());            
-            
+            //If there is a compatVersions field, we'll split it and index the same field on each version
+            if (e.Fields.ContainsKey("compatVersions"))
+            {
+                //split into separate versions
+                var compatVersions = e.Fields["compatVersions"].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                AddNumericalVersionValue(e, "num_compatVersions", compatVersions);
+
+                //remove the current compatVersions field from the lucene doc
+                e.Document.RemoveField("compatVersions");
+
+                foreach (var version in compatVersions)
+                {
+                    //add a 'compatVersions' field for each compatVersion (same field name but different values)
+                    //not analyzed, we don't use this for searching
+                    e.Document.Add(new Field("compatVersions", version, Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS, Field.TermVector.NO));
+                }
+            }
         }
 
         private static UmbracoContext EnsureUmbracoContext()
@@ -284,7 +291,5 @@ namespace OurUmbraco.Our.Examine
             }
 
         }
-
-        
     }
 }

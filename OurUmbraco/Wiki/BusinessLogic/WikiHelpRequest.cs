@@ -35,24 +35,22 @@ namespace OurUmbraco.Wiki.BusinessLogic
 
         public void Save()
         {
-            var helpRequestEventArgs = new HelpRequestEventArgs();
+            HelpRequestEventArgs e = new HelpRequestEventArgs();
 
-            FireBeforeSave(helpRequestEventArgs);
+            FireBeforeSave(e);
 
-            if (helpRequestEventArgs.Cancel)
-                return;
-
-            using (var sqlHelper = umbraco.BusinessLogic.Application.SqlHelper)
+            if (!e.Cancel)
             {
-                sqlHelper.ExecuteNonQuery(
-                    "INSERT INTO wikiHelpRequest (section, application, applicationPage, url) VALUES(@section, @application, @applicationPage, @url)",
-                    sqlHelper.CreateParameter("@section", Section),
-                    sqlHelper.CreateParameter("@application", Application),
-                    sqlHelper.CreateParameter("@applicationPage", ApplicationPage),
-                    sqlHelper.CreateParameter("@url", Url));
+                Data.SqlHelper.ExecuteNonQuery(
+               "INSERT INTO wikiHelpRequest (section, application, applicationPage, url) VALUES(@section, @application, @applicationPage, @url)",
+               Data.SqlHelper.CreateParameter("@section", Section),
+               Data.SqlHelper.CreateParameter("@application", Application),
+                Data.SqlHelper.CreateParameter("@applicationPage", ApplicationPage),
+               Data.SqlHelper.CreateParameter("@url", Url));
 
-                FireAfterSave(helpRequestEventArgs);
+                FireAfterSave(e);
             }
+
         }
 
         private Events _e = new Events();

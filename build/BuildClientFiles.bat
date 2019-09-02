@@ -1,48 +1,34 @@
 @ECHO OFF
 SETLOCAL
+	:: SETLOCAL is on, so changes to the path not persist to the actual user's path
 	
 SET release=%1
-SET toolsFolder=%CD%\tools\
+ECHO Installing Npm NuGet Package
+
+SET nuGetFolder=%CD%\..\packages\
+ECHO Configured packages folder: %nuGetFolder%
 ECHO Current folder: %CD%
 
-SET nodeFileName=node-v8.9.4-win-x86.7z
-SET nodeExtractFolder="%toolsFolder%node.js.894"
-IF NOT EXIST %nodeExtractFolder% (
-	ECHO Downloading node.js
-	powershell -Command "(New-Object Net.WebClient).DownloadFile('http://nodejs.org/dist/v8.9.4/%nodeFileName%', '%toolsFolder%\%nodeFileName%')"
-	ECHO Extracting node.js
-	%toolsFolder%\7za.exe x %toolsFolder%\%nodeFileName% -o%nodeExtractFolder% -aos > nul
-)
-FOR /f "delims=" %%A in ('dir %nodeExtractFolder%\node* /b') DO SET "nodePath=%nodeExtractFolder%\%%A"
+%CD%\..\.nuget\NuGet.exe install Npm.js -OutputDirectory %nuGetFolder%  -Verbosity quiet
 
-:build
-	SET npmPath=%nodePath%\node_modules\npm\bin
-	
-	PATH=%npmPath%;%nodePath%
-	SET buildFolder=%CD%
+for /f "delims=" %%A in ('dir %nuGetFolder%node.js.* /b') do set "nodePath=%nuGetFolder%%%A\"
+for /f "delims=" %%A in ('dir %nuGetFolder%npm.js.* /b') do set "npmPath=%nuGetFolder%%%A\tools\"
 
-	ECHO Change directory to %CD%\..\OurUmbraco.Client\
-	CD %CD%\..\OurUmbraco.Client\
+REM Ensures that we look for the just downloaded NPM, not whatever the user has installed on their machine
+path=%npmPath%;%nodePath%
 
-	ECHO.
-	ECHO Setting node_modules folder to hidden to prevent VS13 from crashing on it while loading the websites project
-	attrib +h node_modules
-	
-	ECHO Adding Npm and Node to path 
-	:: SETLOCAL is on, so changes to the path not persist to the actual user's path
-	PATH="%nodePath%";"%npmPath%"	
+ECHO %path%
 
-	SET npm="%nodePath%\node.exe" "%npmPath%\npm-cli.js" %*
+SET buildFolder=%CD%
 
-	ECHO NPM install dependencies
-	%npm% install
-	%npm% install --save-dev jshint gulp-jshint
-	%npm% install -g install gulp -g
-	%npm% rebuild node-sass
-	
-	ECHO Gulp build the client side files
-	gulp build
+ECHO Change directory to %CD%\..\OurUmbraco.Client\
+CD %CD%\..\OurUmbraco.Client\
 
-	ECHO Move back to the build folder
-	CD %buildFolder% 
-	GOTO :EOF
+ECHO Do npm install and the gulp build
+call npm cache clean
+call npm install
+call npm install -g install gulp -g --quiet
+call gulp build
+
+ECHO Move back to the build folder
+CD %buildFolder% 

@@ -3,7 +3,6 @@
 @using Umbraco.Core
 
 @{
-	System.Web.Helpers.AntiForgeryConfig.SuppressXFrameOptionsHeader = true;
 
     var id = int.Parse(Request.QueryString["category_id"]);
     var categoryProvider = new OurUmbraco.MarketPlace.Providers.UmbracoCategoryProvider();
@@ -62,7 +61,7 @@
 
                         <h3><a href="@pUrl@project.Id">@project.Name</a></h3>
 
-                        <div class="category">@project.Name</div>
+                        <div class="category">@project.GetCategoryName()</div>
 
 
                         <div class='commercialIndicator @project.ListingType'>@project.ListingType</div>
@@ -70,7 +69,7 @@
 
                     <div class="hiLite">
 
-                        <p><a rel="@project.ProjectGuid" title="@project.Name" href="@pUrl@project.Id">@project.Name</a></p>
+                        <p><a rel="@project.ProjectGuid" title="@project.Name" href="@pUrl@project.Id">@project.GetCategoryName()</a></p>
 
                     </div>
 

@@ -36,7 +36,7 @@ header {
 		z-index: 200;
 		width: 100%;
 		padding: 10px 0;
-		background: white;
+		background: $color-our;
 		@include transition(all, .2s);
 
 		@media (min-width: $md) {
@@ -83,8 +83,6 @@ header {
 				opacity: .6;
 			}
 		}
-		
-		color: $color-our;
 	}
 
 	nav {
@@ -235,12 +233,10 @@ header {
 		.navigation {
 			background: darken($color-our, 4%);
 			padding: 0;
-			color: white;
 		}
 
 		.menu-toggle {
 			top: 15px;
-			color: white;
 		}
 
 		.logo {
@@ -248,19 +244,7 @@ header {
 				background-size: 30px auto;
 				text-indent: 40px;
 			}
-			color: white;
 		}
-
-        .toggle span {
-            background-color: $color-white;
-            &:before, &:after{
-                background-color: $color-white;
-            }
-        }
-		
-		a, a:visited {
-			color: white;
-		}		
 	}
 }
 
@@ -299,7 +283,6 @@ header {
         z-index: 999;
 
         @include transition(top, .3s);
-		color: $color-our;
     }
 
 	.toggle {
@@ -356,7 +339,7 @@ header {
 			top: 12px;
 			width: 25px;
 			height: 2px;
-			background-color: $color-our;
+			background-color: #fff;
 			display: block;
 
 			&:before, &:after {
@@ -364,7 +347,7 @@ header {
 				content: '';
 				width: 25px;
 				height: 2px;
-				background-color: $color-our;
+				background-color: #fff;
 				display: block;
 			}
 

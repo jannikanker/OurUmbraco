@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using OurUmbraco.Our.Models;
 using umbraco;
-using Umbraco.Core.Models;
 using Umbraco.Core.Persistence;
 
 namespace OurUmbraco.Forum.Models
@@ -59,22 +57,6 @@ namespace OurUmbraco.Forum.Models
 
         [Column("version")]
         public int Version { get; set; }
-
-        public MemberData MemberData { get; set; }
-
-        public bool Subscribed { get; set; }
-
-        public string MainNotification { get; set; }
-
-        public IPublishedContent TopicAuthor { get; set; }
-
-        public List<TopicMember> TopicMembers { get; set; }
-
-        public bool ForumNewTopicsAllowed { get; set; }
-
-        public string ForumUrl { get; set; }
-
-        public string ForumName { get; set; }
 
         public List<SimpleMember> Votes { get; set; }
 

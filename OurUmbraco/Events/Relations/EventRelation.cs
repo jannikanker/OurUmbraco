@@ -30,17 +30,21 @@ namespace OurUmbraco.Events.Relations
 
         private static int GetRelations(string alias, int parentId)
         {
-
-            using (var sqlhelper = umbraco.BusinessLogic.Application.SqlHelper)
-            {
-                var result = sqlhelper.ExecuteScalar<int>(@"
+           
+            ISqlHelper sqlhelper = umbraco.BusinessLogic.Application.SqlHelper;
+            int result = sqlhelper.ExecuteScalar<int>(
+                @"
                 SELECT count(umbracoRelation.id)
                 FROM umbracoRelation
                 INNER JOIN umbracoRelationType ON umbracoRelationType.id = umbracoRelation.relType AND umbracoRelationType.alias = @alias
-                where parentId = @parent", sqlhelper.CreateParameter("@parent", parentId), sqlhelper.CreateParameter("@alias", alias));
-
-                return result;
-            }
+                where parentId = @parent
+                "
+                 ,
+                    sqlhelper.CreateParameter("@parent", parentId),
+                    sqlhelper.CreateParameter("@alias", alias)
+                );
+    
+            return result;
         }
 
         public static int GetSignedUp(int eventId)
@@ -55,25 +59,32 @@ namespace OurUmbraco.Events.Relations
 
         private static List<Relation> GetRelations(string alias, string sort, int parentId, int number)
         {
-            var retval = new List<Relation>();
-            using (var sqlhelper = umbraco.BusinessLogic.Application.SqlHelper)
+            List<Relation> retval = new List<Relation>();
+            ISqlHelper sqlhelper = umbraco.BusinessLogic.Application.SqlHelper;
+
+            IRecordsReader rr = sqlhelper.ExecuteReader(
+
+                string.Format(@"
+                SELECT TOP {0} umbracoRelation.id
+                FROM umbracoRelation
+                INNER JOIN umbracoRelationType ON umbracoRelationType.id = umbracoRelation.relType AND umbracoRelationType.alias = @alias
+                where parentId = @parent
+                ORDER BY datetime {1}                
+                ", number, sort)
+                 
+                 ,
+                    sqlhelper.CreateParameter("@parent", parentId),
+                    sqlhelper.CreateParameter("@alias", alias)
+                );
+
+            while (rr.Read())
             {
-                var query = string.Format(@"
-                    SELECT TOP {0} umbracoRelation.id
-                    FROM umbracoRelation
-                    INNER JOIN umbracoRelationType ON umbracoRelationType.id = umbracoRelation.relType AND umbracoRelationType.alias = @alias
-                    where parentId = @parent
-                    ORDER BY datetime {1}                
-                    ", number, sort);
-
-                using (var reader = sqlhelper.ExecuteReader(query, sqlhelper.CreateParameter("@parent", parentId), sqlhelper.CreateParameter("@alias", alias)))
-                {
-                    while (reader.Read())
-                        retval.Add(new Relation(reader.GetInt("id")));
-
-                    return retval;
-                }
+                retval.Add( new Relation( rr.GetInt("id") ) );
             }
+            rr.Close();
+            rr.Dispose();
+
+            return retval;
         }
 
         public static List<Relation> GetPeopleWaiting(int eventId, int number)

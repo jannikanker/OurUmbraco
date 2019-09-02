@@ -2,7 +2,6 @@
 using OurUmbraco.Forum.Services;
 using OurUmbraco.Powers.BusinessLogic;
 using OurUmbraco.Powers.Library;
-using umbraco.BusinessLogic;
 using Umbraco.Core;
 using Action = OurUmbraco.Powers.BusinessLogic.Action;
 
@@ -24,20 +23,19 @@ namespace OurUmbraco.Our.CustomHandlers
 
         void CommentScoring(object sender, ActionEventArgs e)
         {
-            var action = (Action)sender;
+            Action a = (Action)sender;
 
-            if (action.Alias != "LikeComment" && action.Alias != "DisLikeComment" && action.Alias != "TopicSolved")
-                return;
-
-            var score = Xslt.Score(e.ItemId, action.DataBaseTable);
-
-            //we then add the sum of the total score to the
-            using (var sqlHelper = Application.SqlHelper)
+            if (a.Alias == "LikeComment" || a.Alias == "DisLikeComment" || a.Alias == "TopicSolved")
             {
-                sqlHelper.ExecuteNonQuery("UPDATE forumComments SET score = @score WHERE id = @id",
-                    sqlHelper.CreateParameter("@id", e.ItemId), sqlHelper.CreateParameter("@score", score));
+
+                int score = Xslt.Score(e.ItemId, a.DataBaseTable);
+
+                //we then add the sum of the total score to the
+                Data.SqlHelper.ExecuteNonQuery("UPDATE forumComments SET score = @score WHERE id = @id", Data.SqlHelper.CreateParameter("@id", e.ItemId), Data.SqlHelper.CreateParameter("@score", score));
             }
         }
+
+
 
         void CommentVote(object sender, ActionEventArgs e)
         {

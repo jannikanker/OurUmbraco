@@ -1,4 +1,4 @@
-<Project DefaultTargets="TransformConfigs" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="TransformWebConfig" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectPath>.\</ProjectPath>
     <SourceDirectory>.\OurUmbraco.Site\</SourceDirectory>
@@ -10,19 +10,20 @@
 
   <UsingTask TaskName="TransformXml" AssemblyFile="$(DeployHelperDirectory)Microsoft.Web.Publishing.Tasks.dll"/>
 
-  <Target Name="TransformConfigs">
+  <Target Name="TransformWebConfig">
     <PropertyGroup>
       <WebConfigTransformInputFile>$(SourceDirectory)web.config</WebConfigTransformInputFile>
       <WebConfigTransformFile>$(DeployHelperDirectory)\$(ProjectName)\ConfigTransforms\Web.$(Environment).config</WebConfigTransformFile>
-      <ConfigTransformOutputFolder>$(DeployHelperDirectory)\$(ProjectName)\$(Environment)\</ConfigTransformOutputFolder>
+      <WebConfigTransformOutputFolder>$(DeployHelperDirectory)\$(ProjectName)\$(Environment)\</WebConfigTransformOutputFolder>
+
       <StackTraceEnabled>False</StackTraceEnabled>
     </PropertyGroup>
 
-    <MakeDir Directories="$(ConfigTransformOutputFolder)"/>
+    <MakeDir Directories="$(WebConfigTransformOutputFolder)"/>
 
     <TransformXml Source="$(WebConfigTransformInputFile)"
                   Transform="$(WebConfigTransformFile)"
-                  Destination="$(ConfigTransformOutputFolder)\Web.config"
+                  Destination="$(WebConfigTransformOutputFolder)\Web.config"
                   StackTrace="$(StackTraceEnabled)" />
   </Target>
 </Project>

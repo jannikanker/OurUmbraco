@@ -39,6 +39,7 @@
             <asp:TextBox ID="iconUrl" runat="server" Width="230px" CssClass="guiInputText"></asp:TextBox>            
         </cc2:PropertyPanel>
         <cc2:PropertyPanel runat="server" ID="pp_file" Text="Package file (.zip):">
+            <asp:Button ID="bt_submitButton" runat="server" Text="Submit to repository" Visible="false" />
             <asp:Literal ID="packageUmbFile" runat="server" />
         </cc2:PropertyPanel>
          
@@ -190,7 +191,6 @@
                     <a href="#" onclick="UmbClientMgr.openModalWindow('developer/packages/directoryBrowser.aspx?target=<%= packageControlPath.ClientID %>','Choose a file or a folder', true, 500, 400); return false;"
                         style="border: none;">
                          <i class="icon icon-folder"></i>
-                      </a>
                 </td>
             </tr>
         </table>
@@ -204,7 +204,7 @@
                         during installation and uninstallation.
                         <br />
                         All actions are formed as a xml node, containing data for the action to be performed.
-                        <a href="https://our.umbraco.com/documentation/Reference/Packaging/
+                        <a href="http://our.umbraco.org/wiki/reference/packaging/package-actions
 " target="_blank">Package actions documentation</a>
                     </p>
                     <asp:CustomValidator ID="actionsVal" runat="server" OnServerValidate="validateActions"
