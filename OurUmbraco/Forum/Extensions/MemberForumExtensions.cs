@@ -1,7 +1,10 @@
 ﻿using System.Linq;
 using System.Web.Security;
+using OurUmbraco.Community.People;
+using OurUmbraco.MarketPlace.Extensions;
 using Umbraco.Core.Models;
 using Umbraco.Web;
+using Umbraco.Web.PublishedCache;
 using Umbraco.Web.Security;
 
 namespace OurUmbraco.Forum.Extensions
@@ -12,6 +15,9 @@ namespace OurUmbraco.Forum.Extensions
         /* Core member */
         public static int Karma(this IPublishedContent member)
         {
+            if (member == null || member.HasProperty("reputationCurrent") == false)
+                return 0;
+
             return member.GetPropertyValue<int>("reputationCurrent");
         }
 
@@ -22,7 +28,8 @@ namespace OurUmbraco.Forum.Extensions
 
         public static string Avatar(this IPublishedContent member)
         {
-            return member.GetPropertyValue<string>("avatar");
+            var avatarService = new AvatarService();
+            return avatarService.GetMemberAvatar(member);
         }
         
         public static int Karma(this IMember member)
@@ -63,6 +70,11 @@ namespace OurUmbraco.Forum.Extensions
             return Roles.IsUserInRole("HQ");
         }
 
+        public static bool IsTeamUmbraco(this MembershipHelper helper)
+        {
+            return Roles.IsUserInRole("HQ") || Roles.IsUserInRole("TeamUmbraco");
+        }
+
         public static bool IsAdmin(this IPublishedContent helper)
         {
             return ModeratorRoles.Split(',').Any(Roles.IsUserInRole);
@@ -71,6 +83,25 @@ namespace OurUmbraco.Forum.Extensions
         public static bool IsHq(this IPublishedContent helper)
         {
             return Roles.IsUserInRole("HQ");
+        }
+
+        public static bool IsSpam(this IPublishedContent member)
+        {
+            if (member.GetPropertyValue<bool>("blocked"))
+                return true;
+
+            // Members with over 71 karma are trusted automatically
+            if (member.Karma() >= 71)
+                return false;
+
+            var typedMember = (MemberPublishedContent) member;
+            if (typedMember == null)
+                // Member is not logged in, don't bother
+                return false;
+
+            var roles = Roles.GetRolesForUser(typedMember.UserName);
+            var isSpam = roles.Contains("potentialspam") || roles.Contains("newaccount");
+            return isSpam;
         }
     }
 }

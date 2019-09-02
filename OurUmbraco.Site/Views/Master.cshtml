@@ -1,0 +1,183 @@
+﻿@using ClientDependency.Core.Mvc
+@using Umbraco.Core.Configuration
+@inherits OurUmbraco.Our.Models.OurUmbracoTemplatePage
+@{
+    Layout = null;
+    var model = UmbracoContext.Current.PublishedContentRequest.PublishedContent;
+    var bodyCss =
+        model.Level > 2 && model.AncestorOrSelf(3).Id == 1057
+            ? "profile has-sidebar"
+            : model.DocumentTypeAlias.ToLower().Replace(" ", "-") + "-page";
+
+    var memberIsBlocked = MemberData != null && MemberData.IsBlocked;
+
+
+    Html.RequiresCss("~/assets/css/style.min.css", 0);
+    Html.RequiresCss("https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.1.20/jquery.fancybox.min.css", 0);
+
+
+    Html.RequiresJs("https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.13.1/jquery.validate.min.js");
+    Html.RequiresJs("https://ajax.aspnetcdn.com/ajax/mvc/4.0/jquery.validate.unobtrusive.min.js");
+    Html.RequiresJs("https://cdnjs.cloudflare.com/ajax/libs/pagedown/1.0/Markdown.Converter.js");
+    Html.RequiresJs("https://cdnjs.cloudflare.com/ajax/libs/pagedown/1.0/Markdown.Editor.js");
+    Html.RequiresJs("https://cdnjs.cloudflare.com/ajax/libs/pagedown/1.0/Markdown.Sanitizer.js");
+    Html.RequiresJs("https://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js");
+    Html.RequiresJs("https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.1.20/jquery.fancybox.min.js");
+    Html.RequiresJs("~/assets/js/jquery.ajaxfileupload.js");
+
+    Html.RequiresJs("~/assets/js/jquery.scrolly.js");
+    Html.RequiresJs("~/assets/js/lodash.min.js");
+    Html.RequiresJs("~/assets/js/community.js");
+    Html.RequiresJs("~/assets/js/app.min.js");
+    Html.RequiresJs("~/assets/js/editor.min.js");
+}<!doctype html>
+<!--[if gt IE 8]><!-->
+<html class="no-js" lang="en">
+<!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="alternate" type="application/rss+xml" title="Latest packages" href="//our.umbraco.com/rss/projects" />
+    <link rel="alternate" type="application/rss+xml" title="Package updates" href="//our.umbraco.com/rss/projectsupdate" />
+    <link rel="alternate" type="application/rss+xml" title="Active forum topics" href="//our.umbraco.com/rss/activetopics" />
+    
+    <link rel="search" type="application/opensearchdescription+xml" title="our.umbraco.com" href="/scripts/OpenSearch.xml">
+
+    <!-- Application name -->
+    <meta name="application-name" content="Our Umbraco" />
+    <meta name="apple-mobile-web-app-title" content="Our Umbraco">
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon-precomposed" href="/assets/images/app-icons/icon-60.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/assets/images/app-icons/icon-72.png">
+    <link rel="apple-touch-icon-precomposed" sizes="76x76" href="/assets/images/app-icons/icon-76.png">
+    <link rel="icon" sizes="192x192" href="/assets/images/app-icons/touch-icon-192x192.png">
+
+    <meta name="msapplication-TileImage" content="/assets/images/app-icons/tile.png" />
+    <meta name="msapplication-config" content="/assets/images/app-icons/browserconfig.xml">
+
+    <link rel="icon" type="image/png" href="/assets/images/app-icons/favicon.png">
+
+    @if (IsSectionDefined("SeoMetaData"))
+    {
+        @RenderSection("SeoMetaData", false)
+    }
+    else
+    {
+        <title>
+            @{
+                var title = string.Empty;
+                var navigationTitle = HttpContext.Current.Items["topicTitle"];
+                if (navigationTitle != null)
+                {
+                    title = navigationTitle.ToString();
+                }
+
+                if (string.IsNullOrWhiteSpace(title) == false)
+                {
+                    <text>@title - </text>
+                }
+            }
+
+            @Model.Content.Name - our.umbraco.com
+        </title>
+        <meta name="description" content="">
+    }
+
+    <script type="text/javascript" src="/scripts/jquery-1.9.1.min.js"></script>
+
+    @Html.Partial("~/Views/Partials/Community/JsValues.cshtml")
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-W9TZ2XW');</script>
+    <!-- End Google Tag Manager -->
+
+    @Html.RenderCssHere()
+    @RenderSection("HeadCssScripts", false)
+</head>
+
+<body class="@bodyCss">
+
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W9TZ2XW"
+                  height="0" width="0" style="display: none; visibility: hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+@Html.Partial("~/Views/Partials/Members/QuickMenu.cshtml")
+
+<div class="wrapper">
+    <header>
+        <div class="navigation">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-3">
+                        <a class="logo" href="/">Our Umbraco</a>
+                    </div>
+                    <div id="toggle" class="menu-toggle">
+                        <a href="#" class="toggle cross"><span></span></a>
+                    </div>
+                    <nav class="col-md-9">
+                        @Html.Partial("~/Views/Partials/Navigation/TopNavigation.cshtml")
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    @{
+        if (memberIsBlocked == false)
+        {
+            @Html.Partial("~/Views/Partials/Global/AlertBar.cshtml")
+            @RenderSection("Search", false)
+            @RenderBody()
+        }
+        else
+        {
+            <section class="forum">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h1 class="text-center">Computer says no</h1>
+                            <p>Unfortunately, it seems that your account has been blocked.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        }
+    }
+
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12">
+                    <p><a href="/code-of-conduct">Code Of Conduct</a> - <a href="/privacy-policy">Privacy Policy</a></p>
+                    <p>&nbsp;</p>
+                    Our.umbraco.com is the community mothership for <a href="https://umbraco.com">Umbraco</a>, the open source asp.net cms. With a friendly forum for all your questions, a comprehensive documentation and a ton of packages from the community.
+                    @if (HttpContext.Current != null && HttpContext.Current.Request.UserAgent != null && HttpContext.Current.Request.UserAgent.ToLower().Contains("googlebot"))
+                    {
+                        <text>This site is running Umbraco.</text>
+                    }
+                    else
+                    {
+                        <text>This site is running</text>
+                        <data id="umbraco-version" value="@UmbracoVersion.GetSemanticVersion()">Umbraco version @UmbracoVersion.GetSemanticVersion()</data>
+                    }
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</div>
+<!--.wrapper-->
+
+@Html.RenderJsHere()
+
+@RenderSection("EndScripts", false)
+</body>
+</html>

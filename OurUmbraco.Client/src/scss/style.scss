@@ -16,6 +16,11 @@
 
 
 /**
+/* Utilities
+**/
+@import 'utilities/flexbox';
+
+/**
 /* Elements
 **/
 
@@ -46,6 +51,10 @@
 @import 'elements/notification';
 @import 'elements/alertbar';
 @import 'elements/utilities';
+@import 'elements/videos';
+@import 'elements/overlay';
+@import 'elements/umb-load-indicator';
+@import 'elements/note';
 
 /**
 /* Sections
@@ -55,7 +64,8 @@
 @import 'sections/forum';
 @import 'sections/people';
 @import 'sections/events';
-
+@import 'sections/contributors';
+@import 'sections/gitter';
 
 /**
 /* Pages
@@ -69,5 +79,6 @@
 @import 'pages/release';
 @import 'pages/wiki';
 @import 'pages/forum';
+@import 'pages/community';
 
 @import 'elements/wrap-old-our';

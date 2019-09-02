@@ -4,9 +4,14 @@ using System.Linq;
 using System.Web;
 using OurUmbraco.Forum.Extensions;
 using OurUmbraco.Forum.Models;
+using OurUmbraco.NotificationsWeb.Library;
+using OurUmbraco.Our.Models;
+using umbraco;
 using Umbraco.Core;
 using Umbraco.Core.Cache;
+using Umbraco.Core.Models;
 using Umbraco.Core.Persistence;
+using Umbraco.Web;
 
 namespace OurUmbraco.Forum.Services
 {
@@ -118,7 +123,7 @@ FETCH NEXT @count ROWS ONLY";
         /// </summary>
         /// <param name="category"></param>
         /// <returns></returns>
-        public int GetAllTopicsCount(int category = -1)
+        public int GetAllTopicsCount(int category = -1, bool unsolved = false, bool noreplies = false)
         {
             const string sql1 = @"SELECT COUNT(*) as forumTopicCount
 FROM forumTopics
@@ -129,6 +134,77 @@ LEFT OUTER JOIN umbracoNode u2 ON (forumTopics.memberId = u2.id AND u2.nodeObjec
             const string sqlic = sql1 + "WHERE isSpam=0 AND forumTopics.parentId=@category";
 
             var sql = (category > 0 ? sqlic : sqlix);
+
+            if (unsolved)
+                if (sql.Contains("WHERE"))
+                    sql = sql + " AND answer = 0";
+                else
+                    sql = sql + " WHERE answer = 0";
+
+            if (noreplies)
+                if (sql.Contains("WHERE"))
+                    sql = sql + " AND replies = 0";
+                else
+                    sql = sql + " WHERE replies = 0";
+
+            return _databaseContext.Database.ExecuteScalar<int>(sql, new { category = category });
+        }
+
+        /// <summary>
+        /// Returns all topics in a certain date range
+        /// </summary>
+        public IEnumerable<Topic> GetAllTopics(bool unsolved = false, bool noreplies = false)
+        {
+            var sql = @"SELECT * FROM forumTopics WHERE isSpam=0";
+
+            if (unsolved)
+                if (sql.Contains("WHERE"))
+                    sql = sql + " AND answer = 0";
+                else
+                    sql = sql + " WHERE answer = 0";
+
+            if (noreplies)
+                if (sql.Contains("WHERE"))
+                    sql = sql + " AND replies = 0";
+                else
+                    sql = sql + " WHERE replies = 0";
+
+            return _databaseContext.Database.Fetch<Topic>(sql);
+        }
+
+        /// <summary>
+        /// Returns a count of all topics
+        /// </summary>
+        /// <param name="category"></param>
+        /// <returns></returns>
+        public int GetAllTopicsCountByDateRange(DateTime fromDate, DateTime toDate, int category = -1, bool unsolved = false, bool noreplies = false)
+        {
+            const string sql1 = @"SELECT COUNT(*) as forumTopicCount
+FROM forumTopics
+LEFT OUTER JOIN umbracoNode u1 ON (forumTopics.latestReplyAuthor = u1.id AND u1.nodeObjectType = '39EB0F98-B348-42A1-8662-E7EB18487560')
+LEFT OUTER JOIN umbracoNode u2 ON (forumTopics.memberId = u2.id AND u2.nodeObjectType = '39EB0F98-B348-42A1-8662-E7EB18487560')
+";
+            const string sqlix = sql1 + "WHERE isSpam=0";
+            const string sqlic = sql1 + "WHERE isSpam=0 AND forumTopics.parentId=@category";
+
+            var sql = (category > 0 ? sqlic : sqlix);
+
+            if (unsolved)
+                if (sql.Contains("WHERE"))
+                    sql = sql + " AND answer = 0";
+                else
+                    sql = sql + " WHERE answer = 0";
+
+            if (noreplies)
+                if (sql.Contains("WHERE"))
+                    sql = sql + " AND replies = 0";
+                else
+                    sql = sql + " WHERE replies = 0";
+
+            if (sql.Contains("WHERE"))
+                sql = sql + " AND (forumTopics.Created BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "')";
+            else
+                sql = sql + " WHERE (forumTopics.Created BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "')";
 
             return _databaseContext.Database.ExecuteScalar<int>(sql, new { category = category });
         }
@@ -337,23 +413,96 @@ WHERE forumTopics.id=@id
         /// </summary>
         /// <param name="context"></param>
         /// <param name="cache"></param>
+        /// <param name="memberData"></param>
+        /// <param name="content"></param>
         /// <returns></returns>
         /// <remarks>
         /// So that we don't have to look this up multiple times in a single request, this will use the given ICacheProvider to cache it
         /// </remarks>
-        public ReadOnlyTopic CurrentTopic(HttpContextBase context, ICacheProvider cache)
+        public ReadOnlyTopic CurrentTopic(HttpContextBase context, ICacheProvider cache, MemberData memberData, IPublishedContent content)
         {
-            return (ReadOnlyTopic)cache.GetCacheItem(typeof(TopicService) + "-CurrentTopic", () =>
-           {
-               var contextId = context.Items["topicID"] as string;
-               if (contextId != null)
-               {
-                   int topicId;
-                   if (int.TryParse(contextId, out topicId))
-                       return QueryById(topicId);
-               }
-               return null;
-           });
+            var topic = (ReadOnlyTopic)cache.GetCacheItem(typeof(TopicService) + "-CurrentTopic", () =>
+            {
+                var contextId = context.Items["topicID"] as string;
+                if (contextId == null)
+                    return null;
+
+                return int.TryParse(contextId, out var topicId) ? QueryById(topicId) : null;
+            });
+
+            if (topic == null)
+                return null;
+
+            topic.MemberData = memberData;
+            if (content != null)
+            {
+                topic.ForumNewTopicsAllowed = content.NewTopicsAllowed();
+                topic.MainNotification = content.GetPropertyValue<string>("mainNotification");
+                if (string.IsNullOrWhiteSpace(topic.MainNotification))
+                    topic.MainNotification = "This forum is in read only mode, you can no longer reply";
+                topic.ForumName = content.Name;
+                topic.ForumUrl = content.Url;
+            }
+
+            if (memberData != null && memberData.Member != null)
+                topic.Subscribed = Utils.IsSubscribedToForumTopic(topic.Id, memberData.Member.Id);
+
+            var currentMember = memberData != null && memberData.Member != null
+                ? memberData.Member
+                : null;
+
+            var topicAuthorIsCurrentMember = currentMember != null && topic.MemberId == currentMember.Id;
+
+            var umbracoHelper = new UmbracoHelper(UmbracoContext.Current);
+            topic.TopicAuthor = topicAuthorIsCurrentMember
+                ? currentMember
+                : umbracoHelper.TypedMember(topic.MemberId);
+
+            topic.TopicMembers = new List<TopicMember>();
+            if (topic.TopicAuthor != null)
+            {
+                var author = new TopicMember
+                {
+                    Member = topic.TopicAuthor,
+                    Roles = topicAuthorIsCurrentMember ? memberData.Roles : topic.TopicAuthor.GetRoles()
+                };
+                topic.TopicMembers.Add(author);
+            }
+
+            foreach (var comment in topic.Comments)
+            {
+                if (topic.TopicMembers.Any(x => x.Member.Id == comment.MemberId))
+                    continue;
+
+                var commentAuthorIsCurrentMember = currentMember != null && comment.MemberId == currentMember.Id;
+                if (commentAuthorIsCurrentMember)
+                {
+                    var commentAuthor = new TopicMember { Member = currentMember, Roles = memberData.Roles };
+                    topic.TopicMembers.Add(commentAuthor);
+                }
+                else
+                {
+                    var commentMember = umbracoHelper.TypedMember(comment.MemberId);
+                    if (commentMember == null)
+                        continue;
+
+                    var commenterRoles = commentMember.GetRoles();
+                    var commentAuthor = new TopicMember { Member = commentMember, Roles = commenterRoles };
+                    topic.TopicMembers.Add(commentAuthor);
+                }
+            }
+
+            foreach (var comment in topic.Comments)
+            {
+                comment.TopicMembers = topic.TopicMembers;
+                comment.MemberData = memberData;
+                if (topic.Answer == comment.Id)
+                    comment.IsAnswer = true;
+                var forumContent = umbracoHelper.TypedContent(topic.ParentId);
+                comment.ForumNewTopicsAllowed = forumContent.NewTopicsAllowed();
+            }
+
+            return topic;
         }
 
 

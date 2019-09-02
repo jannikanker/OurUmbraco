@@ -40,7 +40,7 @@ html {
         display: table-cell;
         vertical-align: top;
         width:$sb-width;
-        background-color: lighten($color-our, 30%);
+        background-color: white;
         height: 100%;
 
         @media (max-width:992px) {
@@ -63,11 +63,11 @@ html {
             display: inline-block;
             overflow: hidden;
             width: 100%;
-            max-width: $sb-desktop / 100% * $sb-width;
             text-align: center;
 
             @media (min-width: $md) {
                 float: right;
+                max-width: $sb-desktop / 100% * $sb-width;
             }
         }
     }
@@ -80,7 +80,7 @@ html {
         padding-bottom: 200px;
 
         @media (max-width:992px) {
-            
+
             display: block;
             width: 100%;
 
@@ -96,10 +96,10 @@ html {
         @media (min-width: 2100px) {
             width:100% - $sb-retina-width;
         }
-        
+
         .main-content {
             display: block;
-            width: 100%;   
+            width: 100%;
             padding-left: 20px;
             padding-right: 20px;
             padding-top: 20px;
@@ -143,7 +143,9 @@ html {
             margin-left: 5px;
             padding-left: 10px;
             transition: max-height 300ms ease-in-out;
-            li.active > a *{
+            li.active > h4 a,
+            li.active > a *,
+            li.active > h3 {
                 color: darken($color-our, 20%);
             }
             li.open > ul {
@@ -173,10 +175,13 @@ html {
                 cursor: pointer;
             }
             @media (max-width: 992px) {
-                border-left: none; 
+                border-left: none;
                 background-color: lighten($color-our,10%);
                 padding-top: 10px;
                 padding-bottom: 10px;
+                h3 {                    
+                    color:$color-white;
+                }
             }
         }
 
@@ -191,6 +196,10 @@ html {
             @media (max-width: 992px) {
                 border-left: none;
                 background-color:  lighten($color-our,15%);
+                h4 {
+                    color: $color-white;
+                }
+
             }
         }
 
@@ -205,6 +214,9 @@ html {
             @media (max-width: 992px) {
                 border-left: none;
                 background-color:  lighten($color-our,25%);
+                h3 {                    
+                    color:$color-white;
+                }
             }
         }
     }

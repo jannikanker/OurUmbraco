@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\LibGit2Sharp.NativeBinaries.1.0.205\build\LibGit2Sharp.NativeBinaries.props" Condition="Exists('..\packages\LibGit2Sharp.NativeBinaries.1.0.205\build\LibGit2Sharp.NativeBinaries.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -12,6 +13,8 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,121 +34,196 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AutoMapper, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\AutoMapper.3.0.0\lib\net40\AutoMapper.dll</HintPath>
+    <Reference Include="AngleSharp, Version=0.9.9.0, Culture=neutral, PublicKeyToken=e83494dcdc6d31ea, processorArchitecture=MSIL">
+      <HintPath>..\packages\AngleSharp.0.9.9.2\lib\net45\AngleSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Autofac, Version=3.5.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="AutoMapper, Version=3.3.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoMapper.3.3.1\lib\net40\AutoMapper.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="AutoMapper.Net4, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\AutoMapper.3.0.0\lib\net40\AutoMapper.Net4.dll</HintPath>
+    <Reference Include="AutoMapper.Net4, Version=3.3.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoMapper.3.3.1\lib\net40\AutoMapper.Net4.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="businesslogic, Version=1.0.6079.16192, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UmbracoCms.Core.7.5.2\lib\businesslogic.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Bayeux, Version=0.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Bayeux.0.1.0-preview0003\lib\netstandard1.1\Bayeux.dll</HintPath>
     </Reference>
-    <Reference Include="ClientDependency.Core, Version=1.9.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ClientDependency.1.9.1\lib\net45\ClientDependency.Core.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="businesslogic, Version=1.0.7144.21661, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UmbracoCms.Core.7.15.1\lib\net452\businesslogic.dll</HintPath>
+    </Reference>
+    <Reference Include="ClientDependency.Core, Version=1.9.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ClientDependency.1.9.7\lib\net45\ClientDependency.Core.dll</HintPath>
     </Reference>
     <Reference Include="ClientDependency.Core.Mvc, Version=1.8.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ClientDependency-Mvc5.1.8.0.0\lib\net45\ClientDependency.Core.Mvc.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="cms, Version=1.0.6079.16193, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UmbracoCms.Core.7.5.2\lib\cms.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="cms, Version=1.0.7144.21661, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UmbracoCms.Core.7.15.1\lib\net452\cms.dll</HintPath>
     </Reference>
-    <Reference Include="controls, Version=1.0.6079.16194, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UmbracoCms.Core.7.5.2\lib\controls.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="ColorCode, Version=1.0.1.62759, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ColorCode.1.0.1\lib\ColorCode.dll</HintPath>
+    </Reference>
+    <Reference Include="controls, Version=1.0.7144.21662, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UmbracoCms.Core.7.15.1\lib\net452\controls.dll</HintPath>
     </Reference>
     <Reference Include="CookComputing.XmlRpcV2, Version=2.5.0.0, Culture=neutral, PublicKeyToken=a7d6e17aa302004d, processorArchitecture=MSIL">
       <HintPath>..\packages\xmlrpcnet.2.5.0\lib\net20\CookComputing.XmlRpcV2.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="EasyHttp, Version=1.6.29.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\EasyHttp.1.6.29.0\lib\net40\EasyHttp.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Examine, Version=0.1.90.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Examine.0.1.90\lib\net45\Examine.dll</HintPath>
     </Reference>
-    <Reference Include="Examine, Version=0.1.69.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Examine.0.1.69.0\lib\Examine.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="GitterSharp, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\gitter-api-pcl.1.0.0-preview2\lib\netstandard1.1\GitterSharp.dll</HintPath>
     </Reference>
-    <Reference Include="HtmlAgilityPack, Version=1.4.9.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
-      <HintPath>..\packages\HtmlAgilityPack.1.4.9\lib\Net45\HtmlAgilityPack.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="GraphQL, Version=2.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GraphQL.2.4.0\lib\net45\GraphQL.dll</HintPath>
+    </Reference>
+    <Reference Include="GraphQL.Client, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GraphQL.Client.1.0.3\lib\netstandard1.1\GraphQL.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="GraphQL.Common, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GraphQL.Common.1.0.3\lib\netstandard1.0\GraphQL.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Hammock.ClientProfile, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c148cfba29ed1a4d, processorArchitecture=MSIL">
+      <HintPath>..\packages\TweetMoaSharp.6.0.0\lib\4.5\Hammock.ClientProfile.dll</HintPath>
+    </Reference>
+    <Reference Include="Hangfire.Console, Version=1.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Hangfire.Console.1.4.2\lib\net45\Hangfire.Console.dll</HintPath>
+    </Reference>
+    <Reference Include="Hangfire.Core, Version=1.7.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Hangfire.Core.1.7.2\lib\net45\Hangfire.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Hangfire.SqlServer, Version=1.7.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Hangfire.SqlServer.1.7.2\lib\net45\Hangfire.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="HtmlAgilityPack, Version=1.8.8.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\packages\HtmlAgilityPack.1.8.8\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+    <Reference Include="HtmlSanitizer, Version=3.0.0.0, Culture=neutral, PublicKeyToken=61c49a1a9e79cc28, processorArchitecture=MSIL">
+      <HintPath>..\packages\HtmlSanitizer.4.0.185\lib\net45\HtmlSanitizer.dll</HintPath>
     </Reference>
     <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="ImageProcessor, Version=2.4.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ImageProcessor.2.4.4.0\lib\net45\ImageProcessor.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="ImageProcessor, Version=2.7.0.100, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ImageProcessor.2.7.0.100\lib\net452\ImageProcessor.dll</HintPath>
     </Reference>
-    <Reference Include="ImageProcessor.Web, Version=4.6.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ImageProcessor.Web.4.6.4.0\lib\net45\ImageProcessor.Web.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="ImageProcessor.Web, Version=4.10.0.100, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ImageProcessor.Web.4.10.0.100\lib\net452\ImageProcessor.Web.dll</HintPath>
     </Reference>
-    <Reference Include="interfaces, Version=1.0.6079.16188, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UmbracoCms.Core.7.5.2\lib\interfaces.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="interfaces, Version=1.0.7144.21635, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UmbracoCms.Core.7.15.1\lib\net452\interfaces.dll</HintPath>
     </Reference>
-    <Reference Include="JsonFx, Version=2.0.1209.2802, Culture=neutral, PublicKeyToken=315052dd637f8a52, processorArchitecture=MSIL">
-      <HintPath>..\packages\JsonFx.2.0.1209.2802\lib\net40\JsonFx.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="LibGit2Sharp, Version=0.24.1.0, Culture=neutral, PublicKeyToken=7cbde695407f0333, processorArchitecture=MSIL">
+      <HintPath>..\packages\LibGit2Sharp.0.24.1\lib\net40\LibGit2Sharp.dll</HintPath>
     </Reference>
-    <Reference Include="log4net, Version=1.2.11.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UmbracoCms.Core.7.5.2\lib\log4net.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\UmbracoCms.Core.7.15.1\lib\net452\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Log4Net.Async, Version=2.0.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Log4Net.Async.2.0.4\lib\net40\Log4Net.Async.dll</HintPath>
     </Reference>
     <Reference Include="Lucene.Net, Version=2.9.4.1, Culture=neutral, PublicKeyToken=85089178b9ac3181, processorArchitecture=MSIL">
       <HintPath>..\packages\Lucene.Net.2.9.4.1\lib\net40\Lucene.Net.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Markdig, Version=0.15.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Markdig.0.15.0\lib\net40\Markdig.dll</HintPath>
+    </Reference>
     <Reference Include="MarkdownDeep, Version=1.5.4615.26275, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MarkdownDeep.NET.1.5\lib\.NetFramework 3.5\MarkdownDeep.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="MarkdownSharp, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Markdown.1.14.4\lib\net45\MarkdownSharp.dll</HintPath>
+    <Reference Include="MarkdownSharp, Version=1.14.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Markdown.1.14.7\lib\net45\MarkdownSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.ApplicationBlocks.Data, Version=1.0.1559.20655, Culture=neutral">
-      <HintPath>..\packages\UmbracoCms.Core.7.5.2\lib\Microsoft.ApplicationBlocks.Data.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\UmbracoCms.Core.7.15.1\lib\net452\Microsoft.ApplicationBlocks.Data.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.2.1\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.2.2\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Owin, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.Identity.Owin.2.2.1\lib\net45\Microsoft.AspNet.Identity.Owin.dll</HintPath>
+      <HintPath>..\packages\Microsoft.AspNet.Identity.Owin.2.2.2\lib\net45\Microsoft.AspNet.Identity.Owin.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.Client, Version=2.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.SignalR.Client.2.2.3\lib\net45\Microsoft.AspNet.SignalR.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.Core, Version=2.4.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.SignalR.Core.2.4.1\lib\net45\Microsoft.AspNet.SignalR.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.SystemWeb, Version=2.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.SignalR.SystemWeb.2.2.3\lib\net45\Microsoft.AspNet.SignalR.SystemWeb.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Configuration, Version=1.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.Configuration.1.1.0\lib\netstandard1.1\Microsoft.Extensions.Configuration.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Owin, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Owin.3.0.1\lib\net45\Microsoft.Owin.dll</HintPath>
+    <Reference Include="Microsoft.Extensions.Configuration.Abstractions, Version=1.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.Configuration.Abstractions.1.1.0\lib\netstandard1.0\Microsoft.Extensions.Configuration.Abstractions.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Owin.Host.SystemWeb, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Owin.Host.SystemWeb.3.0.1\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
+    <Reference Include="Microsoft.Extensions.Configuration.FileExtensions, Version=1.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.Configuration.FileExtensions.1.1.0\lib\net451\Microsoft.Extensions.Configuration.FileExtensions.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Owin.Security, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Owin.Security.3.0.1\lib\net45\Microsoft.Owin.Security.dll</HintPath>
+    <Reference Include="Microsoft.Extensions.Configuration.Json, Version=1.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.Configuration.Json.1.1.0\lib\net451\Microsoft.Extensions.Configuration.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Owin.Security.Cookies, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Owin.Security.Cookies.3.0.1\lib\net45\Microsoft.Owin.Security.Cookies.dll</HintPath>
+    <Reference Include="Microsoft.Extensions.FileProviders.Abstractions, Version=1.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.FileProviders.Abstractions.1.1.0\lib\netstandard1.0\Microsoft.Extensions.FileProviders.Abstractions.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Owin.Security.Google, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Owin.Security.Google.3.0.1\lib\net45\Microsoft.Owin.Security.Google.dll</HintPath>
+    <Reference Include="Microsoft.Extensions.FileProviders.Physical, Version=1.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.FileProviders.Physical.1.1.0\lib\net451\Microsoft.Extensions.FileProviders.Physical.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Owin.Security.OAuth, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Owin.Security.OAuth.3.0.1\lib\net45\Microsoft.Owin.Security.OAuth.dll</HintPath>
+    <Reference Include="Microsoft.Extensions.FileSystemGlobbing, Version=1.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.FileSystemGlobbing.1.1.0\lib\net45\Microsoft.Extensions.FileSystemGlobbing.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Primitives, Version=1.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.Primitives.1.1.0\lib\netstandard1.0\Microsoft.Extensions.Primitives.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=1.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IO.RecyclableMemoryStream.1.2.2\lib\net45\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin, Version=4.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.4.0.1\lib\net45\Microsoft.Owin.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Host.SystemWeb, Version=4.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Host.SystemWeb.4.0.1\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security, Version=4.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.4.0.1\lib\net45\Microsoft.Owin.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security.Cookies, Version=4.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.Cookies.4.0.1\lib\net45\Microsoft.Owin.Security.Cookies.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security.Google, Version=3.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.Google.3.1.0\lib\net45\Microsoft.Owin.Security.Google.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security.OAuth, Version=4.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.OAuth.4.0.1\lib\net45\Microsoft.Owin.Security.OAuth.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks.Extensions, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks.Extensions.Desktop, Version=1.0.168.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.Extensions.Desktop.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
@@ -155,16 +233,24 @@
       <HintPath>..\packages\MiniProfiler.2.1.0\lib\net40\MiniProfiler.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="MySql.Data, Version=6.9.8.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
-      <HintPath>..\packages\MySql.Data.6.9.8\lib\net45\MySql.Data.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="MySql.Data, Version=6.9.9.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <HintPath>..\packages\MySql.Data.6.9.9\lib\net45\MySql.Data.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Nager.Date, Version=1.22.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nager.Date.1.22.3\lib\net45\Nager.Date.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NIdenticon, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NIdenticon.1.3.0\lib\net452\NIdenticon.dll</HintPath>
     </Reference>
     <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="reCAPTCHA.MVC, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\reCAPTCH.MVC.1.0.1\lib\net45\reCAPTCHA.MVC.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RestSharp, Version=104.1.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -175,31 +261,91 @@
       <HintPath>..\packages\semver.1.1.2\lib\net451\Semver.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SQLCE4Umbraco, Version=1.0.6079.16194, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UmbracoCms.Core.7.5.2\lib\SQLCE4Umbraco.dll</HintPath>
+    <Reference Include="Skybrud.Essentials, Version=1.1.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Skybrud.Essentials.1.1.5\lib\net45\Skybrud.Essentials.dll</HintPath>
+    </Reference>
+    <Reference Include="Skybrud.Social.Core, Version=1.0.10.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Skybrud.Social.Core.1.0.10\lib\net45\Skybrud.Social.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Skybrud.Social.GitHub, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Skybrud.Social.GitHub.1.0.0-beta003\lib\net45\Skybrud.Social.GitHub.dll</HintPath>
+    </Reference>
+    <Reference Include="Skybrud.Social.Google, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Skybrud.Social.Google.1.0.0-beta004\lib\net45\Skybrud.Social.Google.dll</HintPath>
+    </Reference>
+    <Reference Include="Skybrud.Social.Meetup, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Skybrud.Social.Meetup.1.0.0-beta003\lib\net45\Skybrud.Social.Meetup.dll</HintPath>
+    </Reference>
+    <Reference Include="Skybrud.Social.Twitter, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Skybrud.Social.Twitter.1.0.0-beta006\lib\net45\Skybrud.Social.Twitter.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Skybrud.Social.Vimeo, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Skybrud.Social.Vimeo.1.0.0-beta003\lib\net45\Skybrud.Social.Vimeo.dll</HintPath>
+    </Reference>
+    <Reference Include="Skybrud.SyntaxHighlighter, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Skybrud.SyntaxHighlighter.1.0.4\lib\net45\Skybrud.SyntaxHighlighter.dll</HintPath>
+    </Reference>
+    <Reference Include="Skybrud.SyntaxHighlighter.Markdig, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Skybrud.SyntaxHighlighter.Markdig.1.0.0-beta003\lib\net45\Skybrud.SyntaxHighlighter.Markdig.dll</HintPath>
+    </Reference>
+    <Reference Include="SQLCE4Umbraco, Version=1.0.7144.21662, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UmbracoCms.Core.7.15.1\lib\net452\SQLCE4Umbraco.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Linq" />
     <Reference Include="System.Data.SqlServerCe, Version=4.0.0.1, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <HintPath>..\packages\UmbracoCms.Core.7.5.2\lib\System.Data.SqlServerCe.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\UmbracoCms.Core.7.15.1\lib\net452\System.Data.SqlServerCe.dll</HintPath>
     </Reference>
     <Reference Include="System.Data.SqlServerCe.Entity, Version=4.0.0.1, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <HintPath>..\packages\UmbracoCms.Core.7.5.2\lib\System.Data.SqlServerCe.Entity.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\UmbracoCms.Core.7.15.1\lib\net452\System.Data.SqlServerCe.Entity.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
-    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    <Reference Include="System.Net" />
+    <Reference Include="System.Net.Http.Extensions, Version=2.2.29.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Net.Http.2.2.29\lib\net45\System.Net.Http.Extensions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.7\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Primitives, Version=4.2.29.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Net.Http.2.2.29\lib\net45\System.Net.Http.Primitives.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Net.Http.WebRequest" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Reactive.Core, Version=3.0.1000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Reactive.Core.3.1.1\lib\net45\System.Reactive.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Interfaces, Version=3.0.1000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Reactive.Interfaces.3.1.1\lib\net45\System.Reactive.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Linq, Version=3.0.1000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Reactive.Linq.3.1.1\lib\net45\System.Reactive.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.3.0\lib\netstandard1.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.InteropServices.RuntimeInformation.4.3.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.6.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Dataflow.4.9.0\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.Web.Cors, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -208,41 +354,33 @@
     </Reference>
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.7\lib\net45\System.Web.Helpers.dll</HintPath>
     </Reference>
-    <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="System.Web.Http, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.7\lib\net45\System.Web.Http.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Http.Cors, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Cors.5.2.3\lib\net45\System.Web.Http.Cors.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Web.Http.WebHost, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.3\lib\net45\System.Web.Http.WebHost.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="System.Web.Http.WebHost, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.7\lib\net45\System.Web.Http.WebHost.dll</HintPath>
     </Reference>
-    <Reference Include="System.Web.Mvc, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="System.Web.Mvc, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.7\lib\net45\System.Web.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.3\lib\net45\System.Web.Razor.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.7\lib\net45\System.Web.Razor.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Services" />
     <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.7\lib\net45\System.Web.WebPages.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.7\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.7\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -251,64 +389,121 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="TidyNet, Version=1.0.0.0, Culture=neutral">
-      <HintPath>..\packages\UmbracoCms.Core.7.5.2\lib\TidyNet.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\UmbracoCms.Core.7.15.1\lib\net452\TidyNet.dll</HintPath>
     </Reference>
-    <Reference Include="umbraco, Version=1.0.6079.16195, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UmbracoCms.Core.7.5.2\lib\umbraco.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="TweetSharp, Version=6.0.0.0, Culture=neutral, PublicKeyToken=c148cfba29ed1a4d, processorArchitecture=MSIL">
+      <HintPath>..\packages\TweetMoaSharp.6.0.0\lib\4.5\TweetSharp.dll</HintPath>
     </Reference>
-    <Reference Include="Umbraco.Core, Version=1.0.6079.16190, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UmbracoCms.Core.7.5.2\lib\Umbraco.Core.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="umbraco, Version=1.0.7144.21663, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UmbracoCms.Core.7.15.1\lib\net452\umbraco.dll</HintPath>
     </Reference>
-    <Reference Include="umbraco.DataLayer, Version=1.0.6079.16192, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UmbracoCms.Core.7.5.2\lib\umbraco.DataLayer.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Umbraco.Core, Version=1.0.7144.21656, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UmbracoCms.Core.7.15.1\lib\net452\Umbraco.Core.dll</HintPath>
     </Reference>
-    <Reference Include="umbraco.editorControls, Version=1.0.6079.16198, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UmbracoCms.Core.7.5.2\lib\umbraco.editorControls.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="umbraco.DataLayer, Version=1.0.7144.21661, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UmbracoCms.Core.7.15.1\lib\net452\umbraco.DataLayer.dll</HintPath>
+    </Reference>
+    <Reference Include="umbraco.editorControls, Version=1.0.7144.21667, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UmbracoCms.Core.7.15.1\lib\net452\umbraco.editorControls.dll</HintPath>
     </Reference>
     <Reference Include="Umbraco.IdentityExtensions, Version=1.0.5779.34109, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\UmbracoCms.IdentityExtensions.1.0.0\lib\net45\Umbraco.IdentityExtensions.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="umbraco.MacroEngines, Version=1.0.6079.16198, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UmbracoCms.Core.7.5.2\lib\umbraco.MacroEngines.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="umbraco.MacroEngines, Version=1.0.7144.21667, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UmbracoCms.Core.7.15.1\lib\net452\umbraco.MacroEngines.dll</HintPath>
     </Reference>
-    <Reference Include="umbraco.providers, Version=1.0.6079.16194, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UmbracoCms.Core.7.5.2\lib\umbraco.providers.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="umbraco.providers, Version=1.0.7144.21662, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UmbracoCms.Core.7.15.1\lib\net452\umbraco.providers.dll</HintPath>
     </Reference>
-    <Reference Include="Umbraco.Web.UI, Version=1.0.6079.16199, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UmbracoCms.Core.7.5.2\lib\Umbraco.Web.UI.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Umbraco.Web.UI, Version=1.0.7144.21672, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UmbracoCms.Core.7.15.1\lib\net452\Umbraco.Web.UI.dll</HintPath>
     </Reference>
-    <Reference Include="UmbracoExamine, Version=0.7.0.16193, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UmbracoCms.Core.7.5.2\lib\UmbracoExamine.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="UmbracoExamine, Version=0.7.0.21662, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UmbracoCms.Core.7.15.1\lib\net452\UmbracoExamine.dll</HintPath>
     </Reference>
     <Reference Include="UrlRewritingNet.UrlRewriter, Version=2.0.7.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\UrlRewritingNet.2.0.7\lib\UrlRewritingNet.UrlRewriter.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="YouTrackSharp, Version=2.0.11.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YouTrackSharp.2.0.11.0\lib\net40\YouTrackSharp.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="YamlDotNet, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\YamlDotNet.5.2.1\lib\net45\YamlDotNet.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CamelCaseFormatter.cs" />
+    <Compile Include="Community\Banner\BannerService.cs" />
+    <Compile Include="Community\Banner\Controllers\BannersController.cs" />
+    <Compile Include="Community\Banner\Models\Banner.cs" />
+    <Compile Include="Community\Banner\Models\Banners.cs" />
+    <Compile Include="Community\BlogPosts\BlogCachedRssItem.cs" />
+    <Compile Include="Community\BlogPosts\BlogInfo.cs" />
+    <Compile Include="Community\BlogPosts\BlogPostsService.cs" />
+    <Compile Include="Community\BlogPosts\BlogRssChannel.cs" />
+    <Compile Include="Community\BlogPosts\BlogRssItem.cs" />
+    <Compile Include="Community\BlogPosts\BlogRssUtils.cs" />
+    <Compile Include="Community\Calendar\CommunityCalendarItem.cs" />
+    <Compile Include="Community\Calendar\CommunityCalendarItemType.cs" />
+    <Compile Include="Community\Calendar\CommunityCalendarRenderModel.cs" />
+    <Compile Include="Community\Calendar\CommunityCalendarService.cs" />
+    <Compile Include="Community\Calendar\FestivalCalendarItem.cs" />
+    <Compile Include="Community\Calendar\ContentCalendarItem.cs" />
+    <Compile Include="Community\Calendar\MeetupCalendarItem.cs" />
+    <Compile Include="Community\Controllers\CommunityHubPageController.cs" />
+    <Compile Include="Community\Models\GraphQLModel.cs" />
+    <Compile Include="Community\GitHub\Models\Comments\AddCommentResult.cs" />
+    <Compile Include="Community\Models\Repository.cs" />
+    <Compile Include="Community\Models\ViewModels\CommunityBlogPostViewModel.cs" />
+    <Compile Include="Location\LocationService.cs" />
+    <Compile Include="Location\Models\Location.cs" />
+    <Compile Include="Our\Api\DashboardStatisticsController.cs" />
+    <Compile Include="Our\Api\MembersController.cs" />
+    <Compile Include="Our\Api\OurMemberStatisticsController.cs" />
+    <Compile Include="Our\Api\IssuesStatisticsController.cs" />
+    <Compile Include="Our\Api\TeamUmbracoStatisticsController.cs" />
+    <Compile Include="Our\Api\PullRequestStatisticsController.cs" />
+    <Compile Include="Community\GitHub\Controllers\GitHubContributorController.cs" />
+    <Compile Include="Community\Controllers\MeetupsController.cs" />
+    <Compile Include="Community\GitHub\Models\Cached\GitHubCachedGlobalContributorModel.cs" />
+    <Compile Include="Community\GitHub\Models\GitHubGlobalContributorModel.cs" />
+    <Compile Include="Community\Controllers\TwitterSearchController.cs" />
+    <Compile Include="Community\GitHub\Models\GitHubContributorModel.cs" />
+    <Compile Include="Community\GitHub\Models\GithubPullRequestModel.cs" />
+    <Compile Include="Community\GitHub\Models\IGitHubContributorModel.cs" />
+    <Compile Include="Community\GitHub\Models\GitHubContributorsResult.cs" />
+    <Compile Include="Community\Karma\KarmaService.cs" />
+    <Compile Include="Community\Map\MapApiController.cs" />
+    <Compile Include="Community\Map\MapEventHandler.cs" />
+    <Compile Include="Community\Map\MemberLocation.cs" />
+    <Compile Include="Community\Map\RadarHangfireJobs.cs" />
+    <Compile Include="Community\Meetup\MeetupService.cs" />
+    <Compile Include="Community\Meetup\Models\MeetupCacheItem.cs" />
+    <Compile Include="Community\Models\MeetupEventsModel.cs" />
+    <Compile Include="Community\Models\MeetupItem.cs" />
+    <Compile Include="Community\GitHub\Models\GitHubContributorsModel.cs" />
+    <Compile Include="Community\GitHub\Models\IGitHubContributorsModel.cs" />
+    <Compile Include="Community\Models\TweetsModel.cs" />
+    <Compile Include="Community\People\AvatarService.cs" />
+    <Compile Include="Community\People\Models\BadgeMember.cs" />
+    <Compile Include="Community\People\Models\BadgeGroup.cs" />
+    <Compile Include="Community\People\Models\MvpMember.cs" />
+    <Compile Include="Community\People\Models\MvpsPerYear.cs" />
+    <Compile Include="Community\People\Models\PeopleKarmaResult.cs" />
+    <Compile Include="Community\People\PeopleService.cs" />
+    <Compile Include="Community\Twitter\TwitterService.cs" />
+    <Compile Include="Community\Videos\CommunityVideosConstants.cs" />
+    <Compile Include="Community\Videos\CommunityVideosService.cs" />
+    <Compile Include="Community\Videos\YouTubePlayList.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="CustomDateTimeConvertor.cs" />
     <Compile Include="Documentation\Busineslogic\ConventionExtensions.cs" />
     <Compile Include="Documentation\Busineslogic\DefaultVersion.cs" />
     <Compile Include="Documentation\Busineslogic\Events.cs" />
     <Compile Include="Documentation\Busineslogic\GithubSourcePull\Retry.cs" />
-    <Compile Include="Documentation\Busineslogic\GithubSourcePull\ZipDownloader.cs" />
+    <Compile Include="Documentation\DocumentationUpdater.cs" />
     <Compile Include="Documentation\Busineslogic\MarkdownLogic.cs" />
     <Compile Include="Documentation\Controllers\AppVeyorAuthorizeFilterAttribute.cs" />
+    <Compile Include="Documentation\Controllers\LessonsController.cs" />
     <Compile Include="Documentation\Models\Artifact.cs" />
     <Compile Include="Documentation\Models\Compilationmessage.cs" />
     <Compile Include="Documentation\Models\DocFxUpdateModel.cs" />
@@ -316,6 +511,29 @@
     <Compile Include="Documentation\Models\Job.cs" />
     <Compile Include="Documentation\DocumentationContentFinder.cs" />
     <Compile Include="Documentation\Controllers\DocfxController.cs" />
+    <Compile Include="Our\Api\GitHubController.cs" />
+    <Compile Include="Our\EventHandlers\ReleaseEventHandler.cs" />
+    <Compile Include="Our\Extensions\DateTimeExtension.cs" />
+    <Compile Include="Our\Extensions\HtmlHelperExtensions.cs" />
+    <Compile Include="Our\Extensions\ListExtensions.cs" />
+    <Compile Include="Our\Models\FirstPullRequest.cs" />
+    <Compile Include="Our\Models\GitHub\AddComment.cs" />
+    <Compile Include="Our\Models\GitHub\AutoReplies\GitHubAutoReply.cs" />
+    <Compile Include="Our\Models\GitHub\Event.cs" />
+    <Compile Include="Our\Models\GitHub\Comment.cs" />
+    <Compile Include="Our\Models\GitHub\AutoReplies\GitHubAutoReplyPoco.cs" />
+    <Compile Include="Our\Models\GitHub\Issue.cs" />
+    <Compile Include="Our\Models\GitHub\Label.cs" />
+    <Compile Include="Our\Models\GitHub\AutoReplies\GitHubAutoReplyType.cs" />
+    <Compile Include="Our\Models\GitHub\User.cs" />
+    <Compile Include="Our\Models\PullRequestContributor.cs" />
+    <Compile Include="Our\Models\IssuesInPeriod.cs" />
+    <Compile Include="Our\Models\PullRequestsInPeriod.cs" />
+    <Compile Include="Our\Models\Releases.cs" />
+    <Compile Include="Community\Models\TeamUmbraco.cs" />
+    <Compile Include="Our\Services\ContributorBadgeService.cs" />
+    <Compile Include="Our\Services\EmailService.cs" />
+    <Compile Include="Our\Models\ActivationEmailModel.cs" />
     <Compile Include="Events\Api\EventsController.cs" />
     <Compile Include="Events\App_Startup\ControllerRouting.cs" />
     <Compile Include="Events\Library\Xslt.cs" />
@@ -330,6 +548,8 @@
     <Compile Include="Forum\Api\ForumControllerBase.cs" />
     <Compile Include="Forum\Api\PublicForumController.cs" />
     <Compile Include="Forum\Api\TopicController.cs" />
+    <Compile Include="Community\Controllers\StatisticsController.cs" />
+    <Compile Include="Forum\Controllers\LatestActivityController.cs" />
     <Compile Include="Forum\EventHandlers\MemberApprovedEventhandler.cs" />
     <Compile Include="Forum\EventHandlers\NewForumHandler.cs" />
     <Compile Include="Forum\Events.cs" />
@@ -346,11 +566,18 @@
     <Compile Include="Forum\Models\SimpleMember.cs" />
     <Compile Include="Forum\Models\Topic.cs" />
     <Compile Include="Forum\Models\TopicCommentRelator.cs" />
+    <Compile Include="Forum\Models\TopicMember.cs" />
     <Compile Include="Forum\Models\TopicSaveModel.cs" />
     <Compile Include="Forum\Services\CommentService.cs" />
     <Compile Include="Forum\Services\ForumService.cs" />
     <Compile Include="Forum\Services\TopicService.cs" />
     <Compile Include="Forum\Singleton.cs" />
+    <Compile Include="Gitter\GitterApiController.cs" />
+    <Compile Include="Gitter\GitterProxyHub.cs" />
+    <Compile Include="Gitter\GitterRoomSurfaceController.cs" />
+    <Compile Include="Gitter\GitterService.cs" />
+    <Compile Include="Gitter\GitterUmbracoEventHandler.cs" />
+    <Compile Include="Gitter\UmbracoMessage.cs" />
     <Compile Include="MarketPlace\BusinessLogic\ListingCreator\ListingCreatorStep.cs" />
     <Compile Include="MarketPlace\BusinessLogic\ListingCreator\ListingCreatorStepCollection.cs" />
     <Compile Include="MarketPlace\BusinessLogic\ListingCreator\StepDefinitions\Complete.cs" />
@@ -395,6 +622,9 @@
     <Compile Include="NotificationsCore\Notifications\AccountApproved.cs" />
     <Compile Include="NotificationsCore\Notifications\NewForumTopic.cs" />
     <Compile Include="NotificationsCore\Notifications\NewForumComment.cs" />
+    <Compile Include="NotificationsCore\Notifications\NotificationMail.cs" />
+    <Compile Include="NotificationsCore\Notifications\ScheduleHangfireJobs.cs" />
+    <Compile Include="NotificationsCore\Notifications\MarkAsSolutionReminder.cs" />
     <Compile Include="NotificationsCore\NotificationTypes\NewForumTopic.cs" />
     <Compile Include="NotificationsCore\NotificationTypes\NewForumTopicComment.cs" />
     <Compile Include="NotificationsCore\SheduledNotification.cs" />
@@ -407,14 +637,33 @@
     <Compile Include="NotificationsWeb\Services\NotificationService.cs" />
     <Compile Include="NotificationsWeb\Singleton.cs" />
     <Compile Include="Our\Api\CommunityController.cs" />
+    <Compile Include="Community\GitHub\GitHubService.cs" />
     <Compile Include="Our\Api\SearchController.cs" />
+    <Compile Include="Our\Api\StatisticsController.cs" />
+    <Compile Include="Our\Businesslogic\GoogleAnalytics.cs" />
     <Compile Include="Our\Businesslogic\ProjectContributor.cs" />
     <Compile Include="Our\Controllers\AvatarController.cs" />
+    <Compile Include="Our\Controllers\BreadcrumbController.cs" />
+    <Compile Include="Our\Controllers\OurUmbracoController.cs" />
+    <Compile Include="Our\Controllers\ResetPasswordController.cs" />
+    <Compile Include="Our\CustomHandlers\PullRequestIndexer.cs" />
+    <Compile Include="Our\Examine\DateRangeSearchFilter.cs" />
+    <Compile Include="Our\Examine\PullRequestIndexDataService.cs" />
+    <Compile Include="Our\Examine\ProjectPopularityPoints.cs" />
+    <Compile Include="Our\Extensions\UrlExtensions.cs" />
+    <Compile Include="Our\Models\EditScreenshotModel.cs" />
+    <Compile Include="Our\Models\EditFileModel.cs" />
+    <Compile Include="Our\Models\EditProjectModel.cs" />
     <Compile Include="Our\Controllers\LoginController.cs" />
+    <Compile Include="Our\Models\MemberData.cs" />
+    <Compile Include="Our\Models\MyProjectsModel.cs" />
     <Compile Include="Our\Controllers\ProfileController.cs" />
     <Compile Include="Our\Controllers\ProfileNotificationController.cs" />
     <Compile Include="Our\Controllers\ProjectController.cs" />
+    <Compile Include="Our\Controllers\ProjectsController.cs" />
     <Compile Include="Our\Controllers\RegisterController.cs" />
+    <Compile Include="Our\Controllers\SearchController.cs" />
+    <Compile Include="Our\Controllers\TermsAndConditionsController.cs" />
     <Compile Include="Our\CustomHandlers\CommentVote.cs" />
     <Compile Include="Our\CustomHandlers\ExternalVote.cs" />
     <Compile Include="Our\CustomHandlers\ForumIndexer.cs" />
@@ -424,9 +673,7 @@
     <Compile Include="Our\CustomHandlers\ProjectIndexer.cs" />
     <Compile Include="Our\CustomHandlers\ProjectsEnsureGuid.cs" />
     <Compile Include="Our\CustomHandlers\ProjectVote.cs" />
-    <Compile Include="Our\CustomHandlers\SearchPageRouteHandler.cs" />
     <Compile Include="Our\CustomHandlers\TopicVote.cs" />
-    <Compile Include="Our\Data.cs" />
     <Compile Include="Our\DefaultMemberAvatarHandler.cs" />
     <Compile Include="Our\Examine\DocumentationIndexConfig.cs" />
     <Compile Include="Our\Examine\DocumentationIndexDataService.cs" />
@@ -438,6 +685,7 @@
     <Compile Include="Our\Examine\RangeSearchFilter.cs" />
     <Compile Include="Our\Examine\SearchFilter.cs" />
     <Compile Include="Our\Examine\SearchFilters.cs" />
+    <Compile Include="Our\Extensions\StringExtensions.cs" />
     <Compile Include="Our\GoogleOAuth\UmbracoAuthTokenServerExtensions.cs" />
     <Compile Include="Our\GoogleOAuth\UmbracoCustomOwinStartup.cs" />
     <Compile Include="Our\GoogleOAuth\UmbracoGoogleAuthExtensions.cs" />
@@ -447,59 +695,27 @@
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Our\MigrationsHandler.cs" />
+    <Compile Include="Our\Models\OurUmbracoTemplatePage.cs" />
     <Compile Include="Our\Models\ProfileModel.cs" />
     <Compile Include="Our\Models\ProfileNotificationModel.cs" />
+    <Compile Include="Our\Models\ProjectCompleteModel.cs" />
     <Compile Include="Our\Models\ProjectDetails.cs" />
+    <Compile Include="Our\Models\PasswordResetModel.cs" />
     <Compile Include="Our\Models\RegisterModel.cs" />
     <Compile Include="Our\Models\SearchResultContentModel.cs" />
     <Compile Include="Our\Models\SearchResultModel.cs" />
+    <Compile Include="Our\Models\TermsAndConditionsModel.cs" />
+    <Compile Include="Our\Models\ScreenshotModel.cs" />
+    <Compile Include="Our\Models\WikiFileModel.cs" />
     <Compile Include="Our\ProjectFileUploadHandler.cs" />
     <Compile Include="Our\Rest.cs" />
-    <Compile Include="Our\Scheduling\Scheduler.cs" />
-    <Compile Include="Our\Scheduling\YouTrackSync.cs" />
     <Compile Include="Our\SearchResultExtensions.cs" />
-    <Compile Include="Our\usercontrols\acceptTos.ascx.cs">
-      <DependentUpon>acceptTos.ascx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Our\usercontrols\acceptTos.ascx.designer.cs">
-      <DependentUpon>acceptTos.ascx.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Our\usercontrols\EventEditor.ascx.cs">
-      <DependentUpon>EventEditor.ascx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Our\usercontrols\EventEditor.ascx.designer.cs">
-      <DependentUpon>EventEditor.ascx.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Our\usercontrols\FileDownloadProxy.ascx.cs">
-      <DependentUpon>FileDownloadProxy.ascx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Our\usercontrols\FileDownloadProxy.ascx.designer.cs">
-      <DependentUpon>FileDownloadProxy.ascx.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Our\usercontrols\Forgotpassword.ascx.cs">
-      <DependentUpon>Forgotpassword.ascx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Our\usercontrols\Forgotpassword.ascx.designer.cs">
-      <DependentUpon>Forgotpassword.ascx.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Our\usercontrols\InsertImage.ascx.cs">
-      <DependentUpon>InsertImage.ascx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Our\usercontrols\InsertImage.ascx.designer.cs">
-      <DependentUpon>InsertImage.ascx.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Our\usercontrols\Login.ascx.cs">
-      <DependentUpon>Login.ascx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Our\usercontrols\Login.ascx.designer.cs">
-      <DependentUpon>Login.ascx.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Our\SecureHasher.cs" />
+    <Compile Include="Our\Services\PullRequestService.cs" />
+    <Compile Include="Our\Services\ReleasesService.cs" />
+    <Compile Include="Our\Services\PackagesService.cs" />
+    <Compile Include="Our\Services\RepositoryManagementService.cs" />
+    <Compile Include="Our\UpcomingFeaturesService.cs" />
     <Compile Include="Our\usercontrols\ProjectCollabRequest.ascx.cs">
       <DependentUpon>ProjectCollabRequest.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -534,20 +750,6 @@
     </Compile>
     <Compile Include="Our\usercontrols\ProjectForums.ascx.designer.cs">
       <DependentUpon>ProjectForums.ascx.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Our\usercontrols\Signup.ascx.cs">
-      <DependentUpon>Signup.ascx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Our\usercontrols\Signup.ascx.designer.cs">
-      <DependentUpon>Signup.ascx.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Our\usercontrols\SignupSimple.ascx.cs">
-      <DependentUpon>SignupSimple.ascx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Our\usercontrols\SignupSimple.ascx.designer.cs">
-      <DependentUpon>SignupSimple.ascx.cs</DependentUpon>
     </Compile>
     <Compile Include="Our\Utils.cs" />
     <Compile Include="OutgoingDateTimeFormatAttribute.cs" />
@@ -611,40 +813,30 @@
     <Compile Include="Project\usercontrols\Deli\Package\Steps\Screenshots.ascx.designer.cs">
       <DependentUpon>Screenshots.ascx.cs</DependentUpon>
     </Compile>
-    <Compile Include="Project\usercontrols\Deli\Profile\MyProjects.ascx.cs">
-      <DependentUpon>MyProjects.ascx</DependentUpon>
+    <Compile Include="Project\usercontrols\Deli\Profile\__MyProjects.ascx.cs">
+      <DependentUpon>__MyProjects.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Project\usercontrols\Deli\Profile\MyProjects.ascx.designer.cs">
-      <DependentUpon>MyProjects.ascx.cs</DependentUpon>
+    <Compile Include="Project\usercontrols\Deli\Profile\__MyProjects.ascx.designer.cs">
+      <DependentUpon>__MyProjects.ascx.cs</DependentUpon>
     </Compile>
     <Compile Include="Project\uVersion\UVersionConfig.cs" />
     <Compile Include="Project\uVersion\uVersion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Release\App_Start\ControllerRouting.cs" />
-    <Compile Include="Release\Controllers\NodeExtensions.cs" />
-    <Compile Include="Release\Download.cs" />
-    <Compile Include="Release\Extensions.cs" />
-    <Compile Include="Release\Import.cs" />
-    <Compile Include="Release\Models\AggregateView.cs" />
-    <Compile Include="Release\Models\Comment.cs" />
-    <Compile Include="Release\Models\Version.cs" />
-    <Compile Include="Release\Models\YouTrackComment.cs" />
-    <Compile Include="Release\Models\YouTrackField.cs" />
-    <Compile Include="Release\Models\YouTrackIssue.cs" />
-    <Compile Include="Release\Release.cs" />
-    <Compile Include="Release\Roadmap.cs" />
-    <Compile Include="Release\Versions.cs" />
     <Compile Include="Repository\Controllers\PackageRepositoryController.cs" />
     <Compile Include="Repository\Controllers\PackageSortOrder.cs" />
     <Compile Include="Repository\Models\Category.cs" />
+    <Compile Include="Repository\Models\DocumentationVersion.cs" />
     <Compile Include="Repository\Models\ExternalSource.cs" />
     <Compile Include="Repository\Models\PackageDetails.cs" />
     <Compile Include="Repository\Models\Package.cs" />
     <Compile Include="Repository\Models\PackageCompatibility.cs" />
+    <Compile Include="Repository\Models\PackageFileVersion.cs" />
     <Compile Include="Repository\Models\PackageImage.cs" />
     <Compile Include="Repository\Models\PackageOwnerInfo.cs" />
+    <Compile Include="Repository\Models\PackageVersionSupport.cs" />
     <Compile Include="Repository\Models\PagedPackages.cs" />
+    <Compile Include="Repository\Services\DocumentationVersionService.cs" />
     <Compile Include="Repository\Services\PackageRepositoryService.cs" />
     <Compile Include="Repository\Project.cs" />
     <Compile Include="Repository\Projects.cs" />
@@ -655,8 +847,12 @@
       <DependentUpon>repository.asmx</DependentUpon>
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="SignalRHubs\ForumPostHub.cs" />
+    <Compile Include="UmbracoAuthorizationFilter.cs" />
     <Compile Include="Version\Config.cs" />
     <Compile Include="Version\uWikiFileVerison.cs" />
+    <Compile Include="Videos\VideosCategory.cs" />
+    <Compile Include="Videos\VideosService.cs" />
     <Compile Include="Wiki\Api\WikiController.cs" />
     <Compile Include="Wiki\BusinessLogic\Data.cs" />
     <Compile Include="Wiki\BusinessLogic\Events.cs" />
@@ -668,6 +864,7 @@
     <Compile Include="Wiki\iNotFoundHandler.cs" />
     <Compile Include="Wiki\Library\Utils.cs" />
     <Compile Include="Wiki\Library\xslt.cs" />
+    <Compile Include="Wiki\Models\MonthlyProjectDownloads.cs" />
     <Compile Include="Wiki\usercontrols\FileUpload.ascx.cs">
       <DependentUpon>FileUpload.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -680,25 +877,10 @@
   <ItemGroup>
     <None Include="Forum\setuptables.sql" />
     <None Include="app.config" />
+    <Compile Include="Our\Examine\ExamineHelper.YamlMetaData.cs" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
-    <Content Include="Our\usercontrols\acceptTos.ascx">
-      <SubType>ASPXCodeBehind</SubType>
-    </Content>
-    <Content Include="Our\usercontrols\EventEditor.ascx">
-      <SubType>ASPXCodeBehind</SubType>
-    </Content>
-    <Content Include="Our\usercontrols\FileDownloadProxy.ascx" />
-    <Content Include="Our\usercontrols\Forgotpassword.ascx">
-      <SubType>ASPXCodeBehind</SubType>
-    </Content>
-    <Content Include="Our\usercontrols\InsertImage.ascx">
-      <SubType>ASPXCodeBehind</SubType>
-    </Content>
-    <Content Include="Our\usercontrols\Login.ascx">
-      <SubType>ASPXCodeBehind</SubType>
-    </Content>
     <Content Include="Our\usercontrols\ProjectCollabRequest.ascx" />
     <Content Include="Our\usercontrols\ProjectContributors.ascx">
       <SubType>ASPXCodeBehind</SubType>
@@ -712,10 +894,6 @@
     <Content Include="Our\usercontrols\ProjectForums.ascx">
       <SubType>ASPXCodeBehind</SubType>
     </Content>
-    <Content Include="Our\usercontrols\Signup.ascx">
-      <SubType>ASPXCodeBehind</SubType>
-    </Content>
-    <Content Include="Our\usercontrols\SignupSimple.ascx" />
     <Content Include="Powers\uPowers.config" />
   </ItemGroup>
   <ItemGroup>
@@ -734,7 +912,7 @@
     <Content Include="Project\usercontrols\Deli\Package\Steps\Screenshots.ascx">
       <SubType>ASPXCodeBehind</SubType>
     </Content>
-    <Content Include="Project\usercontrols\Deli\Profile\MyProjects.ascx">
+    <Content Include="Project\usercontrols\Deli\Profile\__MyProjects.ascx">
       <SubType>ASPXCodeBehind</SubType>
     </Content>
     <Content Include="Repository\webservices\repository.asmx" />
@@ -744,6 +922,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Repository\webservices\App_Data\" />
+    <Folder Include="Views\Statistics\" />
     <Folder Include="Wiki\usercontrols\scripts\" />
   </ItemGroup>
   <ItemGroup>
@@ -757,9 +936,18 @@
     <VSToolsPath Condition="exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v14.0\WebApplications\Microsoft.WebApplication.targets')">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v14.0</VSToolsPath>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>XCOPY "$(ProjectDir)Project\usercontrols\Deli\*.ascx" "$(ProjectDir)..\OurUmbraco.Site\usercontrols\Deli" /y /s
-XCOPY "$(ProjectDir)Our\usercontrols\*.ascx" "$(ProjectDir)..\OurUmbraco.Site\usercontrols\our.umbraco.org" /y</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
+  <Import Project="..\packages\AutoMapper.3.3.1\tools\AutoMapper.targets" Condition="Exists('..\packages\AutoMapper.3.3.1\tools\AutoMapper.targets')" />
+  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets'))" />
+    <Error Condition="!Exists('..\packages\LibGit2Sharp.NativeBinaries.1.0.205\build\LibGit2Sharp.NativeBinaries.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\LibGit2Sharp.NativeBinaries.1.0.205\build\LibGit2Sharp.NativeBinaries.props'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

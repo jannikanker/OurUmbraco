@@ -4,6 +4,8 @@ using Umbraco.Web.WebApi;
 
 namespace OurUmbraco.Forum.Api
 {
+    using OurUmbraco.SignalRHubs;
+
     [MemberAuthorize(AllowType = "member")]
     public class TopicController : ForumControllerBase
     {
@@ -39,7 +41,11 @@ namespace OurUmbraco.Forum.Api
             if (c == null)
                 throw new Exception("Topic not found");
 
-            if (!Library.Utils.IsModerator() && c.MemberId != Members.GetCurrentMemberId())
+
+            var memberShipHelper = new Umbraco.Web.Security.MembershipHelper(UmbracoContext);
+            var currentMemberId = memberShipHelper.GetCurrentMemberId();
+
+            if (Library.Utils.IsModerator() == false && c.MemberId != currentMemberId)
                 throw new Exception("You cannot delete this topic");
 
             TopicService.Delete(c);

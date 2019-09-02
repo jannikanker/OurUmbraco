@@ -1,0 +1,52 @@
+﻿@using OurUmbraco.Community.BlogPosts
+@using OurUmbraco.Community.People
+@using Skybrud.Essentials.Security
+
+@inherits OurUmbraco.Our.Models.OurUmbracoTemplatePage
+@{
+    var service = new BlogPostsService();
+
+    var items = service.GetCachedBlogPosts(60, 4).ToArray();
+
+    if (items.Length == 0)
+    {
+        return;
+    }
+
+    var avatarService = new AvatarService();
+    string img;
+}
+
+@foreach (var item in items)
+{
+    <a href="@item.Link" target="_blank" rel="noopener" class="community-post">
+        @if (item.Blog.HasLogoUrl)
+        {
+            var avatarPath = item.Blog.LogoUrl;
+            img = avatarService.GetImgWithSrcSet(avatarPath, item.Blog.Title, 100);
+        }
+        else
+        {
+            var fakeHash = SecurityUtils.GetMd5Hash(item.Blog.Id + "");
+            var avatarPath = avatarService.GetFakeAvatar(fakeHash);
+            img = avatarService.GetImgWithSrcSet(avatarPath, item.Blog.Title, 100);
+        }
+        
+        <div class="avatar">
+            @Html.Raw(img.Replace("mode=crop", "mode=max"))
+        </div>
+
+        <div class="meta">
+            <div class="forum-thread-text">
+                <h3>@item.Title</h3>
+                <p>@item.PublishedDate.ToString("MMM d, yyyy") by @item.Blog.Title</p>
+            </div>
+        </div>
+    </a>
+}
+
+@if (items.Length % 2 == 1)
+{
+    // If there is an odd amount of items, we add a invisible div so the last item doesn't take up the full width
+    <div class="community-post" style="visibility: hidden;"></div>
+}

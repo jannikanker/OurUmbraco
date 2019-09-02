@@ -1,0 +1,129 @@
+﻿﻿@inherits UmbracoTemplatePage
+@using OurUmbraco.Repository.Services
+@{
+    Layout = "~/Views/Master.cshtml";
+
+    var docVersionService = new DocumentationVersionService();
+    var currentVersion = docVersionService.GetCurrentMajorVersion();
+    var altVersions = docVersionService.GetAlternateDocumentationVersions(Request.Url, true);
+
+    var currentDocVersion = altVersions.Where(x => x.IsCurrentPage).FirstOrDefault();
+}
+@section SeoMetaData {
+    @if (currentDocVersion != null)
+    {
+        if (currentDocVersion.MetaTitle != null)
+        {
+            <title>@currentDocVersion.MetaTitle - Our Umbraco</title>
+        }
+        else
+        {
+            <title>
+                @{
+                    var title = string.Empty;
+                    var navigationTitle = HttpContext.Current.Items["topicTitle"];
+                    if (navigationTitle != null)
+                    {
+                        title = navigationTitle.ToString();
+                    }
+
+                    if (string.IsNullOrWhiteSpace(title) == false)
+                    {
+                        if (Model.Content.Name.ToString().ToLower() == "documentation")
+                        {
+                            var path = title.Split(new string[] { " - " }, StringSplitOptions.None);
+
+                            var textInfo = new System.Globalization.CultureInfo("en-US", false).TextInfo;
+
+                            var firstUrlPath = textInfo.ToTitleCase(path[0]).Replace('-', ' ');
+                            var lastUrlPath = textInfo.ToTitleCase(path[path.Length - 1]).Replace('-', ' ');
+
+
+                            <text>@firstUrlPath, @lastUrlPath - Our Umbraco</text>
+                        }
+                        else
+                        {
+                            <text>@title - @Model.Content.Name - Our Umbraco</text>
+                        }
+                    }
+                }
+            </title>
+        }
+        //If no description is set this will just be empty - which is what it used to be anyways, could think of adding some sort of fallback?
+        <meta name="description" content="@currentDocVersion.MetaDescription" />
+    }
+    else
+    {
+        <title>
+            @{
+                var title = string.Empty;
+                var navigationTitle = HttpContext.Current.Items["topicTitle"];
+                if (navigationTitle != null)
+                {
+                    title = navigationTitle.ToString();
+                }
+
+                if (string.IsNullOrWhiteSpace(title) == false)
+                {
+                    <text>@title - </text>
+                }
+            }
+            @Model.Content.Name - our.umbraco.com
+        </title>
+        <meta name="description" content="">
+    }
+}
+<div class="has-sidebar">
+    <div class="documentation">
+        <div class="page-content">
+            <div class="sidebar-area">
+                <div class="sidebar-content">
+                    <div class="content-wrapper">
+                        @Html.Partial("~/Views/Partials/Documentation/Navigation.cshtml")
+                    </div><!-- .content-wrapper -->
+                </div><!-- .sidebar-content -->
+            </div><!-- .sidebar-area-->
+            <div class="main-area">
+                <div class="main-content">
+                    <div class="content-wrapper">
+                        <div>
+                            @Html.Partial("~/Views/Partials/Documentation/Breadcrumb.cshtml")
+                        </div>
+                        <div class="search-big">
+                            <div class="textSearch">
+                                <input type="search" class="docs-search-input" required placeholder="Search for documentation">
+                                <label for="search">Search for documentation</label>
+                            </div>
+                            <select class="version-search-select">
+                                <option value="8" selected="@(currentVersion == "8"? "selected" : null)">v8</option>
+                                <option value="7" selected="@(currentVersion == "7"? "selected" : null)">v7</option>
+                                <option value="6" selected="@(currentVersion == "6"? "selected" : null)">v6</option>
+                            </select>
+                        </div>
+                        <ul class="search-all-results docs-search-listing"></ul>
+                        <div id="markdown-docs" class="docs-default-listing markdown-syntax">
+                            @Html.Partial("~/Views/Partials/Documentation/DisplayMarkdown.cshtml")
+                        </div>
+                    </div><!-- .content-wrapper -->
+                </div><!-- .main-content -->
+            </div><!-- .main-area -->
+        </div><!-- .page-content -->
+        <script type="text/template" class="search-item-docs">
+            <li>
+                <a href="{{ url }}">
+                    <div class="type-icon">
+                        <i class="icon-Book-alt"></i>
+                    </div>
+                    <div class="type-context">
+                        <div class="type-name">
+                            {{ name }}
+                        </div>
+                        <div class="type-description">
+                            {{ body }}
+                        </div>
+                    </div>
+                </a>
+            </li>
+        </script>
+    </div>
+</div>

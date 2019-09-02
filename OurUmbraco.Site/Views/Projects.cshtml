@@ -1,0 +1,97 @@
+﻿@inherits UmbracoTemplatePage
+@{
+    Layout = "~/Views/Master.cshtml";
+}
+
+<div class="page-content">
+    <div class="sidebar-area">
+        <div class="sidebar-content">
+            <div class="content-wrapper">
+                <nav>
+                    <ul class="level-1">
+                        <li class="filter-orderBy">
+                            <h3>Packages</h3>
+                            <ul class="level-2">
+                                <li class="param-updateDate"><h4><a href="?orderBy=updateDate">Updated packages</a></h4></li>
+                                <li class="param-popularity"><h4><a href="?orderBy=popularity">Popular packages</a></h4></li>
+                            </ul>
+                        </li>
+                        <li class="filter-version">
+                            <h3>By Version</h3>
+                            <ul class="level-2">
+                                <li class="param-8"><h4><a href="?version=8">Version 8</a></h4></li>
+                                <li class="param-7"><h4><a href="?version=7">Version 7</a></h4></li>
+                                <li class="param-6"><h4><a href="?version=6">Version 6</a></h4></li>
+                                <li class="param-4"><h4><a href="?version=4">Version 4</a></h4></li>
+                            </ul>
+                        </li>
+                        <li class="filter-category">
+                            <h3>By Category</h3>
+                            @Html.Partial("~/Views/Partials/Projects/ListCategories.cshtml")
+                        </li>
+                    </ul>
+                </nav>
+
+            </div><!-- .content-wrapper -->
+        </div><!-- .sidebar-content -->
+    </div><!-- .sidebar-area -->
+
+    <div class="main-area">
+        <div class="main-content">
+            <div class="content-wrapper">
+                <div>
+                    @Html.Action("Render", "Breadcrumb", new { linkToCurrent = true })
+                </div>
+                <div class="packages-content">
+                    @Html.Partial("~/Views/Partials/Projects/ListProjects.cshtml")
+                </div>
+
+            </div><!-- .content-wrapper -->
+        </div><!-- .main-content -->
+    </div><!-- .main-area -->
+
+</div><!-- .page-content -->
+
+@section EndScripts
+{
+    <script type="text/javascript">
+        function getUrlVars() {
+            var vars = [], hash;
+            var location = window.location;
+            var queryIndex = location.href.indexOf('?');
+            if (queryIndex >= 0) {
+                var hashes = location.href.slice(queryIndex + 1).split('&');
+                for (var i = 0; i < hashes.length; i++) {
+                    hash = hashes[i].split('=');
+                    vars.push(hash[0]);
+                    vars[hash[0]] = hash[1];
+                }
+            }
+            return vars;
+        }
+
+        var query = getUrlVars();
+
+        // test if any parameters are available
+        if (query.length && query[0]) { 
+            var filter = '.filter-' + query[0];
+            var filterElem = $(filter);
+
+            // test if element exists
+            if (filterElem.length) {
+                filterElem.addClass('active open');
+
+                var selectedMenuItem = filterElem.find('.param-' + decodeURIComponent(query[query[0]]).replace(' ', ''));
+
+                if (selectedMenuItem.length) {
+                    selectedMenuItem.addClass('active');
+                }
+            }
+        }
+
+        $('.level-1>li').on('click', function () {
+            $('.level-1>li').removeClass('active open');
+            $(this).addClass('active open');
+        });
+    </script>
+}

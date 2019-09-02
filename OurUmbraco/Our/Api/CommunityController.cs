@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Drawing;
 using System.Dynamic;
-using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Web;
 using System.Web.Http;
-using System.Xml;
 using Newtonsoft.Json;
 using OurUmbraco.Our.Businesslogic;
 using umbraco.BusinessLogic;
-using umbraco.cms.businesslogic.member;
-using umbraco.cms.businesslogic.web;
+using Umbraco.Web;
 using Umbraco.Web.WebApi;
 
 namespace OurUmbraco.Our.Api
@@ -19,103 +16,6 @@ namespace OurUmbraco.Our.Api
     [Authorize]
     public class CommunityController : UmbracoApiController
     {
-        public static string SetAvatar(int mId, string service)
-        {
-            var member = new Member(mId);
-
-            switch (service)
-            {
-                case "twitter":
-                    if (member.getProperty("twitter") != null && member.getProperty("twitter").Value.ToString() != "")
-                    {
-                        var twitData = Twitter.Profile(member.getProperty("twitter").Value.ToString());
-                        if (twitData.MoveNext())
-                        {
-                            var imgUrl = twitData.Current.SelectSingleNode("//profile_image_url").Value;
-                            return SaveUrlAsBuddyIcon(imgUrl, member);
-                        }
-                    }
-                    break;
-                case "gravatar":
-                    var gravatarUrl = "http://www.gravatar.com/avatar/" + umbraco.library.md5(member.Email) + "?s=48&d=monsterid";
-                    return SaveUrlAsBuddyIcon(gravatarUrl, member);
-            }
-
-            return string.Empty;
-        }
-
-        [HttpGet]
-        public string SetServiceAsBuddyIcon(string service)
-        {
-            var id = Member.GetCurrentMember().Id;
-            return SetAvatar(id, service);
-        }
-
-        private static string SaveUrlAsBuddyIcon(string url, Member m)
-        {
-            var file = m.Id.ToString(CultureInfo.InvariantCulture);
-            var path = HttpContext.Current.Server.MapPath("/media/avatar/" + file + ".jpg");
-
-            if (File.Exists(path))
-                File.Delete(path);
-
-            var webClient = new System.Net.WebClient();
-            webClient.DownloadFile(url, path);
-
-            m.getProperty("avatar").Value = "/media/avatar/" + file + ".jpg";
-            m.XmlGenerate(new XmlDocument());
-            m.Save();
-
-            Member.RemoveMemberFromCache(m);
-            Member.AddMemberToCache(m);
-
-            return "/media/avatar/" + file + ".jpg";
-        }
-
-        [HttpGet]
-        public string SaveWebCamImage(string memberGuid)
-        {
-            var url = HttpContext.Current.Request["AvatarUrl"];
-            if (string.IsNullOrEmpty(url) == false)
-                return "true";
-
-            Member m = Member.GetCurrentMember();
-            if (m != null)
-            {
-                var imageBytes = HttpContext.Current.Request.BinaryRead(HttpContext.Current.Request.ContentLength);
-                var file = m.Id.ToString(CultureInfo.InvariantCulture);
-                var path = HttpContext.Current.Server.MapPath("/media/avatar/" + file + ".jpg");
-
-                using (var ms = new MemoryStream(imageBytes, 0, imageBytes.Length))
-                {
-                    ms.Write(imageBytes, 0, imageBytes.Length);
-
-                    var newImage = Image.FromStream(ms, true).GetThumbnailImage(64, 48, ThumbnailCallback, new IntPtr());
-
-                    if (File.Exists(path))
-                        File.Delete(path);
-
-                    newImage.Save(path, System.Drawing.Imaging.ImageFormat.Jpeg);
-                }
-
-                m.getProperty("avatar").Value = string.Format("/media/avatar/{0}.jpg", file);
-                m.XmlGenerate(new XmlDocument());
-                m.Save();
-
-                Member.RemoveMemberFromCache(m);
-                Member.AddMemberToCache(m);
-
-                return string.Format("/media/avatar/{0}.jpg", file);
-            }
-
-            return "error";
-        }
-
-        private bool ThumbnailCallback()
-        {
-            return true;
-        }
-
         [HttpGet]
         public void AddTag(int nodeId, string group, string tag)
         {
@@ -134,88 +34,85 @@ namespace OurUmbraco.Our.Api
             int tagId = 0;
 
             //first clear out all items associated with this ID...
-            Application.SqlHelper.ExecuteNonQuery("DELETE FROM cmsTagRelationship WHERE (nodeId = @nodeId) AND EXISTS (SELECT id FROM cmsTags WHERE (cmsTagRelationship.tagId = id) AND ([group] = @group));",
-                Application.SqlHelper.CreateParameter("@nodeId", nodeId),
-                Application.SqlHelper.CreateParameter("@group", group));
-
-            //and now we add them again...
-            foreach (string tag in tags.Split(','))
+            using (var sqlHelper = Application.SqlHelper)
             {
-                string cleanedtag = tag.Replace("<", "");
-                cleanedtag = cleanedtag.Replace("'", "");
-                cleanedtag = cleanedtag.Replace("\"", "");
-                cleanedtag = cleanedtag.Replace(">", "");
+                sqlHelper.ExecuteNonQuery(
+                    "DELETE FROM cmsTagRelationship WHERE (nodeId = @nodeId) AND EXISTS (SELECT id FROM cmsTags WHERE (cmsTagRelationship.tagId = id) AND ([group] = @group));",
+                    sqlHelper.CreateParameter("@nodeId", nodeId),
+                    sqlHelper.CreateParameter("@group", group));
 
-                if (cleanedtag.Length > 0)
+                //and now we add them again...
+                foreach (var tag in tags.Split(','))
                 {
+                    var cleanedtag = tag.Replace("<", "");
+                    cleanedtag = cleanedtag.Replace("'", "");
+                    cleanedtag = cleanedtag.Replace("\"", "");
+                    cleanedtag = cleanedtag.Replace(">", "");
+
+                    if (cleanedtag.Length <= 0)
+                        continue;
+
                     try
                     {
-                        tagId = umbraco.editorControls.tags.library.AddTag(cleanedtag, group);
-
+                        tagId = umbraco.editorControls.tags.library.AddTag(cleanedtag, @group);
 
                         if (tagId > 0)
                         {
-
-                            Application.SqlHelper.ExecuteNonQuery("INSERT INTO cmsTagRelationShip(nodeId,tagId) VALUES (@nodeId, @tagId)",
-                                Application.SqlHelper.CreateParameter("@nodeId", nodeId),
-                                 Application.SqlHelper.CreateParameter("@tagId", tagId)
+                            sqlHelper.ExecuteNonQuery(
+                                "INSERT INTO cmsTagRelationShip(nodeId,tagId) VALUES (@nodeId, @tagId)",
+                                sqlHelper.CreateParameter("@nodeId", nodeId),
+                                sqlHelper.CreateParameter("@tagId", tagId)
                             );
 
                             tagId = 0;
-
                         }
                     }
-                    catch { }
+                    catch
+                    {
+                    }
                 }
-
             }
         }
 
         [HttpGet]
         public string ChangeCollabStatus(int projectId, bool status)
         {
-            int _currentMember = Member.GetCurrentMember().Id;
-            if (_currentMember > 0)
-            {
-                Document p = new Document(projectId);
+            var memberShipHelper = new Umbraco.Web.Security.MembershipHelper(UmbracoContext.Current);
+            var currentMember = memberShipHelper.GetCurrentMemberId();
 
-                if ((int)p.getProperty("owner").Value == _currentMember)
-                {
-                    p.getProperty("openForCollab").Value = status;
-
-                    p.Publish(new User(0));
-                    umbraco.library.UpdateDocumentCache(p.Id);
-
-                    return "true";
-                }
-                
+            if (currentMember <= 0)
                 return "false";
-            }
 
-            return "false";
+            var contentService = ApplicationContext.Services.ContentService;
+            var content = contentService.GetById(projectId);
+
+            if (content.GetValue<int>("owner") != currentMember)
+                return "false";
+
+            content.SetValue("openForCollab", status);
+            var result = contentService.PublishWithStatus(content);
+            return result.Success.ToString();
         }
 
         [HttpGet]
         public string RemoveContributor(int projectId, int memberId)
         {
-            int _currentMember = Member.GetCurrentMember().Id;
+            var memberShipHelper = new Umbraco.Web.Security.MembershipHelper(UmbracoContext.Current);
+            var currentMember = memberShipHelper.GetCurrentMemberId();
 
-            if (_currentMember > 0)
-            {
-                umbraco.presentation.nodeFactory.Node p = new umbraco.presentation.nodeFactory.Node(projectId);
-
-                if (p.GetProperty("owner").Value == _currentMember.ToString())
-                {
-
-                    ProjectContributor pc = new ProjectContributor(projectId, memberId);
-                    pc.Delete();
-                    return "true";
-                }
-                
+            if (currentMember <= 0)
                 return "false";
-            }
 
-            return "false";
+            var umbracoHelper = new UmbracoHelper(UmbracoContext.Current);
+            var content = umbracoHelper.Content(projectId);
+
+            if (content.GetPropertyValue<int>("owner") != currentMember)
+                return "false";
+
+            var projectContributor = new ProjectContributor(projectId, memberId);
+            projectContributor.Delete();
+
+            return "true";
         }
 
 
@@ -223,32 +120,38 @@ namespace OurUmbraco.Our.Api
         [HttpPost]
         public HttpResponseMessage ImageUpload()
         {
+            var httpRequest = HttpContext.Current.Request;
+            var allowedSuffixes = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+
             dynamic result = new ExpandoObject();
-            var httpRequest = System.Web.HttpContext.Current.Request;
             if (httpRequest.Files.Count > 0)
             {
-                string filename = string.Empty;
+                var filename = string.Empty;
 
-                Guid g = Guid.NewGuid();
+                var guid = Guid.NewGuid();
 
                 foreach (string file in httpRequest.Files)
                 {
+                    var postedFile = httpRequest.Files[file];
+                    if(postedFile == null)
+                        continue;
 
-                    DirectoryInfo updir = new DirectoryInfo(System.Web.HttpContext.Current.Server.MapPath("/media/upload/" + g));
+                    // only allow files with certain extensions
+                    if(allowedSuffixes.Contains(postedFile.FileName.Substring(postedFile.FileName.LastIndexOf(".", StringComparison.Ordinal))) == false)
+                        continue;
+
+                    var updir = new DirectoryInfo(HttpContext.Current.Server.MapPath("/media/upload/" + guid));
 
                     if (!updir.Exists)
                         updir.Create();
 
-                    var postedFile = httpRequest.Files[file];
-
-                    var filePath = updir.FullName + "/" + postedFile.FileName;
+                    var filePath = string.Format("{0}/{1}", updir.FullName, postedFile.FileName);
                     postedFile.SaveAs(filePath);
                     filename = postedFile.FileName;
-
                 }
 
                 result.success = true;
-                result.imagePath = "/media/upload/" + g + "/" + filename;
+                result.imagePath = string.Format("/media/upload/{0}/{1}", guid, filename);
             }
             else
             {
@@ -257,13 +160,9 @@ namespace OurUmbraco.Our.Api
             }
 
             //jquery ajax file uploader expects html, it parses to json client side
-            var response = new HttpResponseMessage();
-            response.Content = new StringContent(JsonConvert.SerializeObject(result));
+            var response = new HttpResponseMessage { Content = new StringContent(JsonConvert.SerializeObject(result)) };
             response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/html");
             return response;
         }
     }
-
-   
-
 }

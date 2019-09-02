@@ -91,5 +91,22 @@ namespace OurUmbraco.Project.Services
             return compatList;
 
         }
+
+        public int GetAllCompatibilityReportsCount()
+        {
+            var allProjectCompatibilities = _databaseContext.Database.Query<int>("SELECT COUNT(*) FROM DeliVersionCompatibility");
+            var count = allProjectCompatibilities.First();
+            return count;
+        }
+
+        public int GetAllCompatibilityReportsCountByDateRange(DateTime fromDate, DateTime toDate)
+        {
+            var allProjectCompatibilities = _databaseContext.Database.Query<int>(
+                "SELECT COUNT(*) FROM DeliVersionCompatibility WHERE (dateStamp BETWEEN '" + 
+                fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "')");
+
+            var count = allProjectCompatibilities.First();
+            return count;
+        }
     }
 }

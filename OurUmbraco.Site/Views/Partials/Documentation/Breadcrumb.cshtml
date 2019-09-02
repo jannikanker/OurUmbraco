@@ -1,0 +1,53 @@
+﻿@using OurUmbraco.Documentation
+@using OurUmbraco.Documentation.Busineslogic
+@inherits OurUmbraco.Our.Models.OurUmbracoTemplatePage
+
+@{
+    string baseurl = "/";
+    string absolutePath = HttpContext.Current.Request.Url.AbsolutePath;
+    string directoryName = Path.GetDirectoryName(absolutePath);
+
+    directoryName = directoryName.Substring(1);
+    string[] strDirs = directoryName.Split('\\');
+
+    var linkToGithub = string.Empty;
+    if (absolutePath.StartsWith("/project") == false)
+    {
+        linkToGithub = Github.MarkdownFileEditLink();
+    }
+    var linkToGithubIssue = Github.GithubIssueString();
+}
+<div class="utilities">
+    <ul id="breadcrumb">
+        <li><a href="/">Our</a></li>
+        @foreach (var page in strDirs)
+        {
+            <li><a href="@(baseurl+page)/">@page.RemoveDash().UnderscoreToDot().EnsureCorrectDocumentationText()</a></li>
+            {
+                baseurl += page + "/";
+            }
+        }
+        
+        @if (!absolutePath.Contains("-v"))
+        {
+            if (!absolutePath.EndsWith("/"))
+            {
+                <li>@absolutePath.Substring(absolutePath.LastIndexOf('/') + 1).RemoveDash().UnderscoreToDot().EnsureCorrectDocumentationText()</li>
+            }
+        }
+
+
+
+
+    </ul>
+    <div class="utility-actions">
+        @if (string.IsNullOrWhiteSpace(linkToGithub) == false)
+        {
+            <a href="@linkToGithub" id="github-link" class="button green tiny" target="_blank"><i class="icon-Edit"></i>Edit this page</a>
+        }
+        @if (string.IsNullOrWhiteSpace(linkToGithubIssue) == false)
+        {
+            <a href="@linkToGithubIssue" id="github-issue-link" class="button green tiny" target="_blank"><i class="icon-Flag"></i>Report issue</a>
+        }
+    </div>
+</div>

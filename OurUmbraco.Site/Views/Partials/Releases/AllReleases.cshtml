@@ -1,0 +1,82 @@
+@using OurUmbraco.Our.Services
+@inherits OurUmbraco.Our.Models.OurUmbracoTemplatePage
+
+@{
+    var releasesService = new ReleasesService();
+    var releases = releasesService.GetReleasesCache().Where(x => x.Released).OrderByDescending(x => x.FullVersion).ToList();
+    var majorVersionGroups = releases.GroupBy(x => x.FullVersion.Major).OrderByDescending(x => x.Key);
+}
+
+<h1>All Releases</h1>
+@foreach (var majorVersion in majorVersionGroups)
+{
+    <h1>Version @majorVersion.Key</h1>
+
+    var releasesInGroup = releases.Where(x => x.FullVersion.Major == majorVersion.Key).ToList();
+    var newestReleaseInGroup = releasesInGroup.First();
+
+    var features = newestReleaseInGroup.Issues.Count(x => x.Type == "type/enhancement" || x.Type == "type/feature" || x.Type.Contains("Feature"));
+    var issues = newestReleaseInGroup.Issues.Count - features;
+    var breaking = newestReleaseInGroup.Issues.Count(x => x.Breaking);
+    var releaseDate = newestReleaseInGroup.ReleaseDate;
+
+    var infoTexts = new List<string>();
+
+    if (features > 0)
+    {
+        infoTexts.Add(string.Format("Features: {0}", features));
+    }
+    if (issues > 0)
+    {
+        infoTexts.Add(string.Format("Issues fixed: {0}", issues));
+    }
+    if (breaking > 0)
+    {
+        infoTexts.Add(string.Format("Breaking changes: {0}", breaking));
+    }
+    if (Equals(newestReleaseInGroup.ReleaseDate, default(DateTime)) == false)
+    {
+        infoTexts.Add(string.Format("Released: {0:ddd MMM dd yyyy}", releaseDate));
+    }
+
+    var infoText = string.Join("&nbsp;|&nbsp;", infoTexts);
+    
+    <div class="row releaseTable">
+        <div class="col-xs-3">
+
+            <!-- latest release -->
+            <span class="dot big icon-untitled"><span class="line v-line"></span><span class="line h-line"></span></span>
+
+            <!-- the rest -->
+            @for (var i = 0; i < releasesInGroup.Skip(1).Count(); i++)
+            {
+                if (i % 3 == 0)
+                {
+                    <span class="dot small">
+                        <span class="line v-line"></span>
+                        <span class="line h-line"></span>
+                    </span>
+                }
+            }
+        </div>
+
+        <div class="col-xs-9">
+            <div class="row explain">
+
+                <!-- latest release -->
+                <div class="col-xs-12">
+                    <h4 style="display: inline"><a href="@(Model.Content.Url + "/" + newestReleaseInGroup.Version.Replace(".", string.Empty))">v@(newestReleaseInGroup.Version)</a></h4>
+                    <p style="display: inline; padding-left: 20px; color: rgba(0, 0, 0, .4); font-size: .8rem;">@Html.Raw(infoText)</p>
+                </div>
+
+                <!-- the rest -->
+                @foreach (var minorRelease in releasesInGroup.Skip(1))
+                {
+                    <div class="col-xs-4" style="min-height: 133px">
+                        <h5><a href="@(Model.Content.Url + "/" + minorRelease.Version.Replace(".", string.Empty))">@minorRelease.Version</a></h5>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}

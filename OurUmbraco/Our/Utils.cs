@@ -1,14 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Hosting;
 using System.Web.Security;
+using Devcorner.NIdenticon;
+using umbraco.BusinessLogic;
+using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Web;
+using Umbraco.Web.PublishedCache;
 using Member = umbraco.cms.businesslogic.member.Member;
 using MemberGroup = umbraco.cms.businesslogic.member.MemberGroup;
 
@@ -144,6 +151,17 @@ namespace OurUmbraco.Our
         }
 
         /// <summary>
+        /// Returns a dictionary of project id => total downloads but only for package files
+        /// </summary>
+        /// <returns></returns>
+        public static Dictionary<int, int> GetProjectTotalPackageDownload()
+        {
+            return Umbraco.Core.ApplicationContext.Current.DatabaseContext.Database.Fetch<dynamic>(
+                "select nodeId as projectId, SUM(downloads) as total from wikiFiles WHERE [type] = 'package' GROUP BY nodeId")
+                .ToDictionary(x => (int)x.projectId, x => (int)x.total);
+        }
+
+        /// <summary>
         /// Returns a dictionary of project id => any version that has been flagged as being compatible
         /// </summary>
         /// <returns></returns>
@@ -194,58 +212,26 @@ namespace OurUmbraco.Our
 
         public static List<int> GetProjectContributors(int projectId)
         {
-
-
-            List<int> projects = new List<int>();
-
-            umbraco.DataLayer.IRecordsReader dr = Data.SqlHelper.ExecuteReader("SELECT * FROM projectContributors WHERE projectId = " + projectId);
-
-            while (dr.Read())
+            var projects = new List<int>();
+            using (var sqlHelper = Application.SqlHelper)
+            using (var recordsReader = sqlHelper.ExecuteReader("SELECT * FROM projectContributors WHERE projectId = @projectId ", sqlHelper.CreateParameter("@projectId", projectId)))
             {
-                projects.Add(dr.GetInt("memberId"));
+                while (recordsReader.Read())
+                    projects.Add(recordsReader.GetInt("memberId"));
+
+                return projects;
             }
-            return projects;
         }
 
         public static bool IsProjectContributor(int memberId, int projectId)
         {
-            return ((Data.SqlHelper.ExecuteScalar<int>("SELECT 1 FROM projectContributors WHERE projectId = @projectId and memberId = @memberId;",
-                Data.SqlHelper.CreateParameter("@projectId", projectId),
-                Data.SqlHelper.CreateParameter("@memberId", memberId)) > 0));
-        }
-
-        public static string GetMemberAvatar(IPublishedContent member, int avatarSize, bool getRawUrl = false)
-        {
-            var memberAvatarPath = MemberAvatarPath(member);
-            if (string.IsNullOrWhiteSpace(memberAvatarPath) == false)
+            using (var sqlHelper = Application.SqlHelper)
             {
-                return MemberAvatarPath(member) == string.Empty
-                    ? GetGravatar(member.GetPropertyValue("Email").ToString(), avatarSize, member.Name, getRawUrl)
-                    : GetLocalAvatar(member.GetPropertyValue("avatar").ToString(), avatarSize, member.Name, getRawUrl);
+                return sqlHelper.ExecuteScalar<int>(
+                           "SELECT 1 FROM projectContributors WHERE projectId = @projectId and memberId = @memberId;",
+                           sqlHelper.CreateParameter("@projectId", projectId),
+                           sqlHelper.CreateParameter("@memberId", memberId)) > 0;
             }
-
-            return GetGravatar(member.GetPropertyValue("Email").ToString(), avatarSize, member.Name, getRawUrl);
-        }
-
-        private static string MemberAvatarPath(IPublishedContent member)
-        {
-            try
-            {
-                var hasAvatar = member.HasValue("avatar");
-                if (hasAvatar)
-                {
-                    var avatarPath = member.GetPropertyValue("avatar").ToString();
-                    var path = HostingEnvironment.MapPath(avatarPath);
-                    if (System.IO.File.Exists(path))
-                        return path;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.Error<Utils>("Could not get MemberAvatarPath", ex);
-            }
-
-            return string.Empty;
         }
 
         private static Random rnd = new Random();
@@ -254,7 +240,7 @@ namespace OurUmbraco.Our
         {
             if (HttpContext.Current.IsDebuggingEnabled == false)
                 return screenshot;
-            
+
             //NOTE: I guess the below is all to do with testing - even the random images i guess
 
             try
@@ -273,46 +259,7 @@ namespace OurUmbraco.Our
                 LogHelper.Error<Utils>("Could not get Screenshot", ex);
             }
 
-            return "http://lorempixel.com/600/600/?" + rnd.Next();
-        }
-
-        public static Image GetMemberAvatarImage(IPublishedContent member)
-        {
-            var memberAvatarPath = MemberAvatarPath(member);
-            if (string.IsNullOrWhiteSpace(memberAvatarPath) == false)
-            {
-                try
-                {
-                    return Image.FromFile(memberAvatarPath);
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.Error<Utils>(string.Format("Could not create Image object from {0}", memberAvatarPath), ex);
-                }
-            }
-
-            return null;
-        }
-
-        public static string GetGravatar(string email, int size, string memberName, bool getRawUrl = false)
-        {
-            var emailId = email.ToLower();
-            var hash = FormsAuthentication.HashPasswordForStoringInConfigFile(emailId, "MD5").ToLower();
-
-            var url = string.Format("https://www.gravatar.com/avatar/{0}?s={1}&d=mm&r=g&d=retro", hash, size);
-
-            return !getRawUrl
-                ? string.Format("<img src=\"{0}\" alt=\"{1}\" />", url, memberName)
-                : url;
-        }
-
-        public static string GetLocalAvatar(string imgPath, int minSize, string memberName, bool getRawUrl = false)
-        {
-            var url = string.Format("{0}?width={1}&height={1}&mode=crop", imgPath.Replace(" ", "%20"), minSize);
-
-            return !getRawUrl
-                ? string.Format("<img src=\"{0}?width={1}&height={1}&mode=crop\" srcset=\"{0}?width={2}&height={2}&mode=crop 2x, {0}?width={3}&height={3}&mode=crop 3x\" alt=\"{4}\" />", imgPath.Replace(" ", "%20"), minSize, (minSize * 2), (minSize * 3), memberName)
-                : url;
+            return "https://lorempixel.com/600/600/?" + rnd.Next();
         }
     }
 

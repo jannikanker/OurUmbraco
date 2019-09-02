@@ -40,6 +40,7 @@ namespace OurUmbraco.MarketPlace.ListingItem
             ProjectUrl = content.GetPropertyValue<string>("websiteUrl", "");
             SupportUrl = content.GetPropertyValue<string>("supportUrl", "");
             SourceCodeUrl = content.GetPropertyValue<string>("sourceUrl", "");
+            NuGetPackageUrl = content.GetPropertyValue<string>("nuGetPackageUrl", "");
             DemonstrationUrl = content.GetPropertyValue<string>("demoUrl", "");
             OpenForCollab = content.GetPropertyValue<bool>("openForCollab", false);
             NotAPackage = content.GetPropertyValue<bool>("notAPackage", false);
@@ -53,6 +54,8 @@ namespace OurUmbraco.MarketPlace.ListingItem
             VendorId = content.GetPropertyValue<int>("owner");
             Logo = content.GetPropertyValue<string>("logo", "");
             LicenseKey = content.GetPropertyValue<string>("licenseKey", "");
+            IsRetired = content.GetPropertyValue<bool>("isRetired", false);
+            RetiredMessage = content.GetPropertyValue<string>("retiredMessage", "");
         }
 
         public PublishedContentListingItem()
@@ -110,6 +113,7 @@ namespace OurUmbraco.MarketPlace.ListingItem
         public bool NotAPackage { get; set; }
         public bool OpenForCollab { get; set; }
         public string SourceCodeUrl { get; set; }
+        public string NuGetPackageUrl { get; set; }
         public bool Live { get; set; }
         public bool Stable { get; set; }
         public bool Approved { get; set; }
@@ -121,6 +125,7 @@ namespace OurUmbraco.MarketPlace.ListingItem
         public int ProjectViews { get; set; }
         public Guid Version { get; set; }
         public DateTime CreateDate { get; set; }
-        
+        public bool IsRetired { get; set; }
+        public string RetiredMessage { get; set; }
     }
 }

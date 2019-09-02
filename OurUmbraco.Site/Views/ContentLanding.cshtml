@@ -1,0 +1,28 @@
+﻿@inherits UmbracoTemplatePage
+@{
+    Layout = "~/Views/Master.cshtml";
+}
+<div id="contribute" class="subpage">
+    <div id="body" class="markdown-syntax">
+        <div>
+            @Html.Action("Render", "Breadcrumb", new { linkToCurrent = false })
+        </div>
+        <h1>Contribute to the Umbraco Project</h1>
+        <div>
+            @Html.Raw(Model.Content.GetPropertyValue<string>("bodyText"))
+        </div>
+        <div class="options">
+            <div class="row projectGroups">
+                @foreach (var item in Model.Content.Children.Where(x => x.IsVisible()))
+                {
+                    <div class="projectGroup col-md-6">
+                        <div style="background-image: url('@(item.GetPropertyValue<string>("contentIcon"))">
+                            <h3><a href="@item.Url">@item.Name</a></h3>
+                            <p>@(item.GetPropertyValue<string>("abstract"))</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,6 +1,10 @@
 ﻿using System.IO;
 using System.Text.RegularExpressions;
-using MarkdownDeep;
+using Markdig;
+using Markdig.Extensions.AutoIdentifiers;
+using Skybrud.SyntaxHighlighter;
+using Skybrud.SyntaxHighlighter.Markdig;
+
 
 namespace OurUmbraco.Documentation.Busineslogic
 {
@@ -11,6 +15,7 @@ namespace OurUmbraco.Documentation.Busineslogic
         public MarkdownLogic(string filePath)
         {
             _filePath = filePath;
+            AppendAltLessonLink = false;
         }
 
         public const string VersionSession = "DocumentationVersion";
@@ -28,6 +33,8 @@ namespace OurUmbraco.Documentation.Busineslogic
 
         public bool PrefixLinks { get; set; }
 
+        public bool AppendAltLessonLink { get; set; }
+
         public string DoTransformation()
         {
             if (File.Exists(_filePath))
@@ -37,8 +44,32 @@ namespace OurUmbraco.Documentation.Busineslogic
                 var clean = Regex.Replace(text, MarkdownLogic.RegEx, new MatchEvaluator(match => LinkEvaluator(match, PrefixLinks)),
                     RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace);
 
-                Markdown md = new Markdown();
-                string transform = md.Transform(clean);
+                var pipeline = new MarkdownPipelineBuilder()
+                    .UseAbbreviations()
+                    .UseAutoIdentifiers(AutoIdentifierOptions.GitHub)
+                    .UseCitations()
+                    .UseCustomContainers()
+                    .UseDefinitionLists()
+                    .UseEmphasisExtras()
+                    .UseFigures()
+                    .UseFooters()
+                    .UseFootnotes()
+                    .UseGridTables()
+                    .UseMathematics()
+                    .UseMediaLinks()
+                    .UsePipeTables()
+                    .UseYamlFrontMatter()
+                    .UseListExtras()
+                    .UseTaskLists()
+                    .UseDiagrams()
+                    .UseAutoLinks()
+                    .UseSyntaxHighlighter(out SyntaxHighlighterOptions highligther)
+                    .Build();
+
+                highligther.AddAlias("json5", Language.Json);
+
+                var transform = Markdown.ToHtml(clean, pipeline);
+
                 return transform;
             }
 
@@ -79,6 +110,11 @@ namespace OurUmbraco.Documentation.Busineslogic
             else
                 mdUrlTag.TrimEnd('/');
 
+            //Need to ensure we dont append the image links as they 404 if we add altTemplate
+            if (AppendAltLessonLink && rawUrl.StartsWith("images/") == false)
+            {
+                return mdUrlTag.Replace(rawUrl, string.Format("{0}?altTemplate=Lesson", rawUrl.EnsureNoDotsInUrl()));
+            }
 
             return mdUrlTag.Replace(rawUrl, rawUrl.EnsureNoDotsInUrl());
         }

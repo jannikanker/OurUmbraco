@@ -23,7 +23,7 @@ namespace OurUmbraco.Project
         /// </returns>
         public static System.Version GetFromUmbracoString(this string version, bool reduceToConfigured = true)
         {
-            if (string.IsNullOrWhiteSpace(version)) throw new ArgumentException("Value cannot be null or whitespace.", "version");
+            if (string.IsNullOrWhiteSpace(version)) return null;
 
             //need to clean up this string, it could be all sorts of things
             version = version.ToLower()
@@ -33,26 +33,33 @@ namespace OurUmbraco.Project
                 .Replace("v", "")
                 .Replace(".x", "")
                 .Trim(',');
-            if (!version.Contains(".") && version.Length > 0 && version.Length <= 3)
+            if (!version.Contains(".") && version.Length > 0)
             {
                 //if there's no . then it stored the strange way like in uVersion.config
-
-                //pad it out to 3 digits
-                version = version.PadRight(3, '0');
-                int o;
-                if (int.TryParse(version, out o))
+                var uVersion = UVersion.GetAllVersions().FirstOrDefault(x => x.Key == $"v{version}");
+                
+                if (uVersion != null)
                 {
-                    //if it ends with '0', that means it's a X.X.X version
-                    // if it does not end with '0', that means that the last 2 digits are the
-                    // Minor part of the version
-                    version = version.EndsWith("0")
-                        ? string.Format("{0}.{1}.{2}", version[0], version[1], 0)
-                        : string.Format("{0}.{1}.{2}", version[0], version.Substring(1), 0);
+                    version = uVersion.Name.Replace(".x", "");
+                }
+                else
+                {
+                    //pad it out to 3 digits
+                    int o;
+                    version = version.PadRight(3, '0');
+                    if (int.TryParse(version, out o))
+                    {
+                        //if it ends with '0', that means it's a X.X.X version
+                        // if it does not end with '0', that means that the last 2 digits are the
+                        // Minor part of the version
+                        version = version.EndsWith("0")
+                            ? string.Format("{0}.{1}.{2}", version[0], version[1], 0)
+                            : string.Format("{0}.{1}.{2}", version[0], version.Substring(1), 0);
+                    }
                 }
             }
 
-            System.Version result;
-            if (!System.Version.TryParse(version, out result))
+            if (!System.Version.TryParse(version, out var result))
                 return null;
 
             if (!reduceToConfigured)
@@ -62,16 +69,12 @@ namespace OurUmbraco.Project
             // This is so that search results are actually returned. Example, if running 7.4.3 but the latest configured minor is 7.4.0, then
             // no search results are returned because nothing would be tagged as compatible with 7.4.3, only 7.4.0
 
-            //get all Version's configured order by latest
-            var all = UVersion.GetAllAsVersions().ToArray();
+            // get all Version's configured order by latest
+            var allAsVersion = UVersion.GetAllAsVersions().ToArray();
             //search for the latest compatible version to search on
-            foreach (var v in all)
-            {
+            foreach (var v in allAsVersion)
                 if (result > v)
-                {
                     return v;
-                }
-            }
 
             //we couldn't find anything, 
             //this will occur if the passed in version is not greater than any configured versions, in this case we have no choice 
@@ -92,14 +95,14 @@ namespace OurUmbraco.Project
         {
             var asLong =
                 version.Major.ToString().PadLeft(3, '0')
-                + (version.Minor == -1 ? "0" : version.Minor.ToString()).PadRight(3, '0')
-                + (version.Build == -1 ? "0" : version.Build.ToString()).PadRight(3, '0');
+                + (version.Minor == -1 ? "0" : version.Minor.ToString()).PadLeft(3, '0')
+                + (version.Build == -1 ? "0" : version.Build.ToString()).PadLeft(3, '0');
             return long.Parse(asLong);
         }
 
         public static string StripHtmlAndLimit(this String str, int chars)
         {
-            str = umbraco.library.StripHtml(str);
+            str = str.StripHtml();
 
             if (str.Length > chars)
                 str = str.Substring(0, chars);
@@ -107,21 +110,7 @@ namespace OurUmbraco.Project
             return str;
 
         }
-
-        public static string BuildExamineString(this string term, int boost, string field, bool andSearch)
-        {
-            term = Lucene.Net.QueryParsers.QueryParser.Escape(term);
-            var terms = term.Trim().Split(' ');
-            var qs = field + ":";
-            qs += "\"" + term + "\"^" + (boost + 30000).ToString() + " ";
-            qs += field + ":(+" + term.Replace(" ", " +") + ")^" + (boost + 5).ToString() + " ";
-            if (!andSearch)
-            {
-                qs += field + ":(" + term + ")^" + boost.ToString() + " ";
-            }
-            return qs;
-        }
-
+        
         public static string CleanHtmlAttributes(this string description)
         {
             var doc = new HtmlDocument();
@@ -138,6 +127,14 @@ namespace OurUmbraco.Project
                     if (href != null)
                     {
                         element.Attributes.Add("href", href.Value);
+                        element.Attributes.Add("target", "_blank");
+
+                        if (href.Value.StartsWith("https://our.umbraco.") == false &&
+                            href.Value.StartsWith("http://our.umbraco.") == false &&
+                            href.Value.StartsWith("our.umbraco.") == false)
+                        {
+                            element.Attributes.Add("rel", "nofollow");
+                        }
                     }
 
                     if (src != null)

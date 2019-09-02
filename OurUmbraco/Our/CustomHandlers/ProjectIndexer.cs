@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Examine;
 using Examine.LuceneEngine;
@@ -6,6 +7,7 @@ using Examine.LuceneEngine.Providers;
 using OurUmbraco.Our.Examine;
 using OurUmbraco.Wiki.BusinessLogic;
 using Umbraco.Core;
+using Umbraco.Core.Logging;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.EntityBase;
 using Umbraco.Core.Services;
@@ -32,10 +34,7 @@ namespace OurUmbraco.Our.CustomHandlers
         {
             foreach (var item in e.PublishedEntities.Where(x => x.ContentType.Alias == "Project"))
             {
-                if (item.GetValue<bool>("projectLive"))
-                {
-                    UpdateProjectExamineIndex(item);
-                }
+                UpdateProjectExamineIndex(item);
             }
         }
 
@@ -56,6 +55,9 @@ namespace OurUmbraco.Our.CustomHandlers
 
         private void UpdateProjectExamineIndex(IPublishedContent content, int downloads)
         {
+            if (content == null)
+                return;
+
             var simpleDataSet = new SimpleDataSet
             {
                 NodeDefinition = new IndexedNode(),
@@ -64,11 +66,17 @@ namespace OurUmbraco.Our.CustomHandlers
 
             var projectVotes = Utils.GetProjectTotalVotes(content.Id);
             var files = WikiFile.CurrentFiles(content.Id).ToArray();
-            var compatVersions = Utils.GetProjectCompatibleVersions(content.Id);
-            
+            var compatVersions = Utils.GetProjectCompatibleVersions(content.Id) ?? new List<string>();
+            var downloadStats = WikiFile.GetMonthlyDownloadStatsByProject(
+                content.Id,
+                DateTime.Now.Subtract(TimeSpan.FromDays(365)));
+
             var simpleDataIndexer = (SimpleDataIndexer)ExamineManager.Instance.IndexProviderCollection["projectIndexer"];
             simpleDataSet = ((ProjectNodeIndexDataService)simpleDataIndexer.DataService)
-                .MapProjectToSimpleDataIndexItem(content, simpleDataSet, "project", projectVotes, files, downloads, compatVersions);
+                .MapProjectToSimpleDataIndexItem(downloadStats, DateTime.Now, content, simpleDataSet, "project", projectVotes, files, downloads, compatVersions);
+
+            if (simpleDataSet.NodeDefinition.Type == null)
+                simpleDataSet.NodeDefinition.Type = "project";
 
             var xml = simpleDataSet.RowData.ToExamineXml(simpleDataSet.NodeDefinition.NodeId, simpleDataSet.NodeDefinition.Type);
             simpleDataIndexer.ReIndexNode(xml, "project");

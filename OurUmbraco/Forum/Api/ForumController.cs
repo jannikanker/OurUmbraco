@@ -16,6 +16,7 @@ using OurUmbraco.Forum.Extensions;
 using OurUmbraco.Forum.Library;
 using OurUmbraco.Forum.Models;
 using OurUmbraco.Forum.Services;
+using OurUmbraco.Our.Extensions;
 using umbraco;
 using umbraco.cms.helpers;
 using Umbraco.Core;
@@ -25,6 +26,13 @@ using Umbraco.Web.WebApi;
 
 namespace OurUmbraco.Forum.Api
 {
+    using System.Threading.Tasks;
+
+    using Microsoft.AspNet.SignalR;
+    using Microsoft.AspNet.SignalR.Client;
+
+    using OurUmbraco.SignalRHubs;
+
     [MemberAuthorize(AllowType = "member")]
     public class ForumController : ForumControllerBase
     {
@@ -33,34 +41,72 @@ namespace OurUmbraco.Forum.Api
         [HttpPost]
         public ExpandoObject Comment(CommentSaveModel model)
         {
-            dynamic o = new ExpandoObject();
-            var currentMemberId = Members.GetCurrentMemberId();
+            dynamic expandoObject = new ExpandoObject();
+            var currentMember = Members.GetCurrentMember();
 
-            var c = new Comment();
-            c.Body = model.Body;
-            c.MemberId = currentMemberId;
-            c.Created = DateTime.Now;
-            c.ParentCommentId = model.Parent;
-            c.TopicId = model.Topic;
-            c.IsSpam = Members.GetCurrentMember().GetPropertyValue<bool>("blocked") || c.DetectSpam();
-            CommentService.Save(c);
-            if (c.IsSpam)
-                SpamChecker.SendSlackSpamReport(c.Body, c.TopicId, "comment", c.MemberId);
+            var comment = new Comment
+            {
+                Body = model.Body,
+                MemberId = currentMember.Id,
+                Created = DateTime.Now,
+                ParentCommentId = model.Parent,
+                TopicId = model.Topic
+            };
 
-            o.id = c.Id;
-            o.body = c.Body.Sanitize().ToString();
-            o.topicId = c.TopicId;
-            o.authorId = c.MemberId;
-            o.created = c.Created.ConvertToRelativeTime();
-            var author = Members.GetById(currentMemberId);
-            o.authorKarma = author.Karma();
-            o.authorName = author.Name;
-            o.roles = author.GetRoles();
-            o.cssClass = model.Parent > 0 ? "level-2" : string.Empty;
-            o.parent = model.Parent;
-            o.isSpam = c.IsSpam;
+            comment.IsSpam = currentMember.GetPropertyValue<bool>("blocked") || comment.DetectSpam();
+            CommentService.Save(comment);
+            if (comment.IsSpam)
+                SpamChecker.SendSlackSpamReport(comment.Body, comment.TopicId, "comment", comment.MemberId);
 
-            return o;
+            expandoObject.id = comment.Id;
+            expandoObject.body = comment.Body.Sanitize().ToString();
+            expandoObject.topicId = comment.TopicId;
+            expandoObject.authorId = comment.MemberId;
+            expandoObject.created = comment.Created.ConvertToRelativeTime();
+            expandoObject.authorKarma = currentMember.Karma();
+            expandoObject.authorName = currentMember.Name;
+            expandoObject.roles = currentMember.GetRoles().GetBadges();
+            expandoObject.cssClass = model.Parent > 0 ? "level-2" : string.Empty;
+            expandoObject.parent = model.Parent;
+            expandoObject.isSpam = comment.IsSpam;
+
+            SignalRcommentSaved(expandoObject);
+
+            return expandoObject;
+        }
+
+        private void SignalRcommentSaved(dynamic expandoObject)
+        {
+            var root = Url.Content("~/");
+            using (var hubConnection = new HubConnection(root + "/signalr"))
+            {
+                var conProxy = hubConnection.CreateHubProxy("forumPostHub");
+                hubConnection.Start().Wait();
+                conProxy.Invoke("SomeonePosted", expandoObject).Wait();
+            }
+        }
+
+        private void SignalRCommentDeleted(int threadId, int commentId)
+        {
+            var root = Url.Content("~/");
+            using (var hubConnection = new HubConnection(root + "/signalr"))
+            {
+                var conProxy = hubConnection.CreateHubProxy("forumPostHub");
+                hubConnection.Start().Wait();
+                conProxy.Invoke("CommentDeleted", threadId, commentId).Wait();
+            }
+        }
+
+
+        private void SignalRcommentEdited(dynamic c)
+        {
+            var root = Url.Content("~/");
+            using (var hubConnection = new HubConnection(root + "/signalr"))
+            {
+                var conProxy = hubConnection.CreateHubProxy("forumPostHub");
+                hubConnection.Start().Wait();
+                conProxy.Invoke("SomeoneEdited", c).Wait();
+            }
         }
 
         [HttpPut]
@@ -76,6 +122,7 @@ namespace OurUmbraco.Forum.Api
 
             c.Body = model.Body;
             // This is an edit, don't update topic post count
+            SignalRcommentEdited(c);
             CommentService.Save(c, false);
         }
 
@@ -91,7 +138,7 @@ namespace OurUmbraco.Forum.Api
                 throw new Exception("You cannot delete this comment");
 
             CommentService.Delete(c);
-
+            SignalRCommentDeleted(c.TopicId, id);
             if (Members.IsAdmin() && c.MemberId != Members.GetCurrentMemberId())
                 SendSlackNotification(BuildDeleteNotifactionPost(Members.GetCurrentMember().Name, c.MemberId));
         }
@@ -103,7 +150,7 @@ namespace OurUmbraco.Forum.Api
 
             if (c == null)
                 throw new Exception("Comment not found");
-            
+
             return c.Body.SanitizeEdit();
         }
 
@@ -373,12 +420,12 @@ namespace OurUmbraco.Forum.Api
             {
                 commentService.Delete(comment);
             }
-            
+
             var topics = topicService.GetLatestTopicsForMember(member.Id, false, 100);
             foreach (var topic in topics)
             {
                 // Only delete if this member started the topic
-                if(topic.MemberId == member.Id)
+                if (topic.MemberId == member.Id)
                     topicService.Delete(topic);
             }
 
@@ -404,11 +451,11 @@ namespace OurUmbraco.Forum.Api
                 member.SetValue("reputationTotal", minimumKarma);
                 memberService.Save(member);
             }
-            
+
             var rolesForUser = Roles.GetRolesForUser(member.Username);
-            if(rolesForUser.Contains("potentialspam"))
+            if (rolesForUser.Contains("potentialspam"))
                 memberService.DissociateRole(member.Id, "potentialspam");
-            if(rolesForUser.Contains("newaccount"))
+            if (rolesForUser.Contains("newaccount"))
                 memberService.DissociateRole(member.Id, "newaccount");
 
             var topicService = new TopicService(ApplicationContext.Current.DatabaseContext);
@@ -443,7 +490,7 @@ namespace OurUmbraco.Forum.Api
             newForumTopicNotification.SendNotification(member.Email);
 
             SendSlackNotification(BuildBlockedNotifactionPost(Members.GetCurrentMember().Name, member.Id, false));
-			
+
             return minimumKarma;
         }
 
@@ -480,18 +527,6 @@ namespace OurUmbraco.Forum.Api
         {
             var post = string.Format("Topic or comment deleted by admin {0}\n", adminName);
             post = post + string.Format("Go to affected member https://our.umbraco.org/member/{0}\n\n", memberId);
-
-            if (memberId != 0)
-            {
-                var member = global::Umbraco.Web.UmbracoContext.Current.Application.Services.MemberService.GetById(memberId);
-
-                if (member != null)
-                {
-                    var querystring = string.Format("api?ip={0}&email={1}&f=json", Utils.GetIpAddress(), HttpUtility.UrlEncode(member.Email));
-                    post = post + string.Format("Check the StopForumSpam rating: http://api.stopforumspam.org/{0}", querystring);
-                }
-            }
-
             return post;
         }
 
@@ -499,18 +534,6 @@ namespace OurUmbraco.Forum.Api
         {
             var post = string.Format("Member {0} by admin {1}\n", blocked ? "_blocked_" : "*unblocked/approved*", adminName);
             post = post + string.Format("Go to affected member https://our.umbraco.org/member/{0}\n\n", memberId);
-
-            if (memberId != 0)
-            {
-                var member = global::Umbraco.Web.UmbracoContext.Current.Application.Services.MemberService.GetById(memberId);
-
-                if (member != null)
-                {
-                    var querystring = string.Format("api?ip={0}&email={1}&f=json", Utils.GetIpAddress(), HttpUtility.UrlEncode(member.Email));
-                    post = post + string.Format("Check the StopForumSpam rating: http://api.stopforumspam.org/{0}", querystring);
-                }
-            }
-
             return post;
         }
 

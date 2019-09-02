@@ -9,6 +9,7 @@ namespace OurUmbraco.Repository.Models
             Images = new List<PackageImage>();
             Compatibility = new List<PackageCompatibility>();
             ExternalSources = new List<ExternalSource>();
+            StrictFileVersions = new List<PackageFileVersion>();
         }
 
         public PackageDetails(Package package)
@@ -24,7 +25,6 @@ namespace OurUmbraco.Repository.Models
                 this.Name = package.Name;
                 this.Icon = package.Icon;
                 this.LatestVersion = package.LatestVersion;
-                this.MinimumVersion = package.MinimumVersion;
                 this.OwnerInfo = package.OwnerInfo;
             }
         }
@@ -35,6 +35,16 @@ namespace OurUmbraco.Repository.Models
 
         public List<PackageCompatibility> Compatibility { get; set; }
 
+        /// <summary>
+        /// Lists all files that have strict versions
+        /// </summary>
+        public List<PackageFileVersion> StrictFileVersions { get; set; }
+
+        /// <summary>
+        /// A list of all supported/targeted Umbraco versions for all files for this package
+        /// </summary>
+        public string[] TargetedUmbracoVersions { get; set; }
+
         public List<ExternalSource> ExternalSources { get; set; }
 
         public string LicenseName { get; set; }
@@ -44,5 +54,7 @@ namespace OurUmbraco.Repository.Models
         public string NetVersion { get; set; }
 
         public string ZipUrl { get; set; }
+
+        public int ZipFileId { get; set; }
     }
 }

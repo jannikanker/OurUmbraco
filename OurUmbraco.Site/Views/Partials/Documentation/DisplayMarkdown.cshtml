@@ -1,0 +1,191 @@
+@using OurUmbraco.Documentation.Busineslogic
+@using OurUmbraco.Repository.Models
+@using OurUmbraco.Repository.Services
+@inherits OurUmbraco.Our.Models.OurUmbracoTemplatePage
+
+<style>
+    #markdown-docs .anchorjs-link {
+        color: #ff6e00 !important;
+        font-size: 20px !important;
+        text-decoration: none !important;
+    }
+
+    #markdown-docs a.offset-anchor {
+        visibility: hidden;
+        position: relative;
+        top: -100px;
+        display: block;
+    }
+</style>
+@*<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/3.2.1/anchor.js"></script>*@
+<script type="text/javascript" src="/scripts/anchorjs/anchorjs.custom.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        anchors.options = {
+            placement: 'left',
+            visible: "hover",
+            anchorCreated: function (e) {
+                var id = $(e).attr('id');
+                //clear it's id since we'll be creating a custom anchor point with an offset
+                $(e).removeAttr("id");
+                $(e).addClass("anchorjs-heading");
+                $(e).prepend("<a class='offset-anchor' id='" + id + "'></a>");
+            }
+        };
+        anchors.add('.markdown-syntax h1, .markdown-syntax h2, .markdown-syntax h3, .markdown-syntax h4, .markdown-syntax h5, .markdown-syntax h5');
+
+        var element = $(window.location.hash);
+        if (element.length === 1) {
+            setTimeout(function () {
+                //hightlight it
+                element.closest(".anchorjs-heading").css("color", "#ff6e00");
+                element.closest(".anchorjs-heading").find("a").not(".anchorjs-link").css("color", "#ff6e00");
+            }, 100);
+        }
+
+        $("#markdown-docs .anchorjs-link").click(function () {
+            if (element.length === 1) {
+                //un hightlight it
+                element.closest(".anchorjs-heading").css("color", "inherit");
+                element.closest(".anchorjs-heading").find("a").not(".anchorjs-link").css("color", "inherit");
+            }
+        });
+    });
+</script>
+
+@{
+    var path = HttpContext.Current.Items[MarkdownLogic.MarkdownPathKey].ToString();
+    var ml = new MarkdownLogic(path) { PrefixLinks = false };
+    if (path.ToLowerInvariant().EndsWith("index.md".ToLowerInvariant()) || path.ToLowerInvariant().EndsWith("readme.md".ToLowerInvariant()))
+    {
+        if (Request.Url.AbsoluteUri.EndsWith("/") == false)
+        {
+            Response.Redirect(Request.Url + "/", false);
+        }
+    }
+    else
+    {
+        if (Request.Url.AbsoluteUri.EndsWith("/"))
+        {
+            Response.Redirect(Request.Url.AbsoluteUri.Substring(0, Request.Url.AbsoluteUri.Length - 1), false);
+        }
+    }
+
+    if (Request.Url.AbsoluteUri.EndsWith("/index/"))
+    {
+        Response.Redirect(Request.Url.AbsoluteUri.Substring(0, Request.Url.AbsoluteUri.Length - "/index/".Length), false);
+    }
+
+    if (Request.Url.AbsoluteUri.EndsWith("/readme/"))
+    {
+        Response.Redirect(Request.Url.AbsoluteUri.Substring(0, Request.Url.AbsoluteUri.Length - "/readme/".Length), false);
+    }
+
+    var markdown = ml.DoTransformation();
+    // method to determine if alternate versions exist for these docs
+    var docVersionService = new DocumentationVersionService();
+    var altVersions = docVersionService.GetAlternateDocumentationVersions(Request.Url).ToList();// method to determine which alternate versions exist of this page
+    var hasAltVersions = altVersions.Any();  // do we want to indicate future versions in a different colour, or am I making this toooo complicated
+
+    var currentVersion = docVersionService.GetAlternateDocumentationVersions(Request.Url, true).SingleOrDefault(x => x.IsCurrentPage);
+    var currentVersionIsRemovedForv8 = currentVersion != null && currentVersion.VersionRemoved != null && currentVersion.VersionRemoved.StartsWith("8");
+    var currentUmbracoVersion = int.Parse(docVersionService.GetCurrentMajorVersion());
+}
+
+@if (hasAltVersions)
+{
+    <aside>
+        <div class="info-box docs-version-panel">
+            <dl>
+                @*<dt>Applies to</dt>
+                    <dd>v8.0.0</dd>*@
+
+                <dt>@*Alternate*@ Versions</dt>
+                @foreach (var version in altVersions)
+                {
+                    <dd class="@Umbraco.If(version.IsCurrentVersion, "current-version") @Umbraco.If(version.IsCurrentPage, "selected-version")">
+                        @if (version.IsCurrentPage)
+                        {
+                            @(version.Version)
+                        }
+                        else
+                        {
+                            <a href='@version.Url'>@(version.Version)</a>
+                        }
+                        @if (version.IsCurrentVersion)
+                        {
+                            @:(current)
+                        }
+                    </dd>
+                }
+
+            </dl>
+        </div>
+    </aside>
+}
+
+@if (string.IsNullOrWhiteSpace(Request.QueryString["debug"]) == false)
+{
+    <table>
+        @if (currentVersion != null)
+        {
+            <tr>
+                <td>Version from (major)</td>
+                <td> @currentVersion.VersionFrom.Major</td>
+            </tr>
+            <tr>
+                <td>Version to (major)</td>
+                <td> @currentVersion.VersionTo.Major</td>
+            </tr>
+        }
+        else
+        {
+            <tr>
+                <td colspan="2">currentVersion is null</td>
+            </tr>
+        }
+        <tr>
+            <td>Current version in web.config</td>
+            <td>@currentUmbracoVersion</td>
+        </tr>
+        <tr>
+            <td>Is this documentation removed for v8?</td>
+            <td>@currentVersionIsRemovedForv8</td>
+        </tr>
+    </table>
+}
+
+@if (currentUmbracoVersion != null 
+     && currentUmbracoVersion == 8
+     && currentVersionIsRemovedForv8 != null
+     && currentVersionIsRemovedForv8 == false 
+     && currentVersion != null
+     && currentVersion.NeedsV8Update == "true")
+{
+    <div class="note">
+        <p><strong>This article has not yet been verified against Umbraco 8.</strong></p>
+        <p>
+            The concepts and code examples might not work if you are running Umbraco 8.0 or a later version.
+            If you are using Umbraco 7, this article is perfect for you!
+        </p>
+        <p>You are more than welcome to report any issues found on the <a href="https://github.com/umbraco/UmbracoDocs/issues">Documentation Issue Tracker</a>.</p>
+    </div>
+}
+
+@if (currentUmbracoVersion != null 
+     && currentUmbracoVersion == 8 
+     && currentVersion != null
+     && currentVersion.Url.EndsWith("-v7") == false
+     && currentVersionIsRemovedForv8)
+{
+    <div class="warning">
+        <p><strong>This article does not apply to Umbraco 8.</strong></p>
+        <p>
+            The concepts and code in this article have been deprecated in Umbraco 8 and no longer apply.<br />
+            If you are using Umbraco 7, this article is perfect for you!
+        </p>
+    </div>
+}
+
+@Html.Raw(markdown)
+

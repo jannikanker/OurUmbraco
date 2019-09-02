@@ -1,0 +1,283 @@
+@using OurUmbraco.Our.Extensions
+@using OurUmbraco.Our.Models
+@using OurUmbraco.Our.Services
+@using Version = System.Version
+@inherits OurUmbracoTemplatePage
+
+@{
+    var notesOnly = Request.QueryString["notes"] != null;
+
+    Version fromVersion;
+    Version toVersion;
+
+    Version.TryParse(Request.QueryString["from"], out fromVersion);
+    Version.TryParse(Request.QueryString["to"], out toVersion);
+
+    // If there's values in the POST (from the form) then those overrule the values in the querystring
+    if (Request.Form["from"] != null && Request.Form["to"] != null)
+    {
+        Version.TryParse(Request.Form["from"], out fromVersion);
+        Version.TryParse(Request.Form["to"], out toVersion);
+    }
+
+    var releasesService = new ReleasesService();
+    var releases = releasesService.GetReleasesCache().Where(x => x.Released).ToList();
+    var majorVersionGroups = releases.GroupBy(x => x.FullVersion.Major).OrderByDescending(x => x.Key).ToList();
+
+    if (fromVersion != null && toVersion != null && toVersion <= fromVersion)
+    {
+        <p class="error">Can't compare versions that are equal to each other or where the "to" is lower than the "from".</p>
+    }
+
+    // Reset to show the compare between the previous version and the newest available version
+    if ((fromVersion == null && toVersion == null) || (toVersion <= fromVersion))
+    {
+        toVersion = releases.Last().FullVersion;
+        fromVersion = releases.Skip(releases.Count - 2).First().FullVersion;
+    }
+}
+
+<form name="compare" method="get">
+    <div class="row">
+        <div class="col-xs-6 col-sm-4">
+            <div class="row">
+                <div class="col-sm-3 titles">From:</div>
+                <div class="col-sm-9">
+                    <select name="from">
+                        @foreach (var majorVersion in majorVersionGroups)
+                        {
+                            var versions = majorVersion.OrderByDescending(x => x.FullVersion);
+                            <optgroup label="@majorVersion.Key">
+                                @foreach (var version in versions)
+                                {
+                                    if (fromVersion != null && version.FullVersion.ToString() == fromVersion.ToString())
+                                    {
+                                        <option name="@version.Version" selected="selected" value="@version.Version">@version.Version</option>
+                                    }
+                                    else
+                                    {
+                                        <option name="@version.Version" value="@version.Version">@version.Version</option>
+                                    }
+                                }
+                            </optgroup>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6 col-sm-4">
+            <div class="row">
+                <div class="col-sm-3 titles">To:</div>
+                <div class="col-sm-9">
+                    <select name="to">
+                        @foreach (var majorVersion in majorVersionGroups)
+                        {
+                            var versions = majorVersion.OrderByDescending(x => x.FullVersion);
+                            <optgroup label="@majorVersion.Key">
+                                @foreach (var version in versions)
+                                {
+                                    if (version.Version == toVersion.ToString())
+                                    {
+                                        <option name="@version.Version" selected="selected" value="@version.Version">@version.Version</option>
+                                    }
+                                    else
+                                    {
+                                        <option name="@version.Version" value="@version.Version">@version.Version</option>
+                                    }
+                                }
+                            </optgroup>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-4">
+            <div class="row">
+                <div class="col-xs-12">
+                    <input type="submit" value="Compare" class="button" />
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<br />
+
+@if (fromVersion != null && toVersion != null && fromVersion < toVersion)
+{
+    var newFeatures = 0;
+    var breakingChanges = 0;
+    var issuesTasks = 0;
+    var selectedReleases = new List<Release>();
+
+    foreach (var release in releases.OrderByDescending(x => x.FullVersion).Where(release => release.FullVersion != fromVersion && (release.FullVersion >= fromVersion) && (release.FullVersion <= toVersion)))
+    {
+        var foundRelease = releases.FirstOrDefault(x => x.Version == release.Version);
+
+        if (foundRelease == null)
+        {
+            continue;
+        }
+
+        selectedReleases.Add(foundRelease);
+
+        newFeatures += release.Features.Count();
+        breakingChanges += release.Issues.Count(x => x.Breaking);
+        issuesTasks += release.TotalIssueCount - release.FeatureCount;
+    }
+
+    <div class="row">
+        <div class="col-sm-12 explain">
+            <div class="row">
+                <div class="col-xs-12 col-sm-4">
+                    <div class="dot big progress">
+                        <div class="chart" data-percent="100">
+                            <p>@newFeatures</p>
+                        </div>
+                    </div>
+                    <div class="chartDesc">
+                        <h3><a href="#newFeatures">New Features</a></h3>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-4">
+                    <div class="dot big progress">
+                        <div class="chart" data-percent="100">
+                            <p>@breakingChanges</p>
+                        </div>
+                    </div>
+                    <div class="chartDesc">
+                        <h3><a href="#breakingChanges">Breaking Changes</a></h3>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-4">
+                    <div class="dot big progress">
+                        <div class="chart" data-percent="100">
+                            <p>@issuesTasks</p>
+                        </div>
+                    </div>
+                    <div class="chartDesc">
+                        <h3><a href="#issuesTasks">Issues & Tasks</a></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-12 statuses">
+
+            @if (notesOnly == false)
+            {
+                if (newFeatures > 0)
+                {
+                    <div id="newFeatures" class="status features">
+                        <h2>New Features</h2>
+                        @foreach (var release in selectedReleases)
+                        {
+                            var releaseFeatures = release.Features.ToList();
+                            if (releaseFeatures.Any())
+                            {
+                                <h3>Features released in version @release.Version</h3>
+
+                                foreach (var issue in releaseFeatures)
+                                {
+                                    var url = issue.Source == ReleaseSource.YouTrack ? $"https://issues.umbraco.org/issue/{issue.Id}" : $"https://github.com/umbraco/Umbraco-CMS/issues/{issue.Id}";
+                                    <ul>
+                                        <li class="@issue.State.StateIcon()" title="@issue.State">
+                                            <a href="@(url)" target="_blank">@issue.Id - @issue.Title</a>
+                                        </li>
+                                    </ul>
+                                }
+                            }
+                        }
+                    </div>
+                }
+
+                if (breakingChanges > 0)
+                {
+                    <div id="breakingChanges" class="status breaking">
+                        <h2>Breaking Changes</h2>
+                        @foreach (var release in selectedReleases)
+                        {
+                            var breakingInRelease = release.Issues.Where(x => x.Breaking).ToList();
+                            if (breakingInRelease.Any())
+                            {
+                                <h3>Breaking changes in version @release.Version</h3>
+
+                                foreach (var issue in breakingInRelease)
+                                {
+                                    var url = issue.Source == ReleaseSource.YouTrack ? $"https://issues.umbraco.org/issue/{issue.Id}" : $"https://github.com/umbraco/Umbraco-CMS/issues/{issue.Id}";
+                                    <ul>
+                                        <li class="@issue.State.StateIcon()" title="@issue.State">
+                                            <a href="@(url)" target="_blank">@issue.Id - @issue.Title</a>
+                                        </li>
+                                    </ul>
+                                }
+                            }
+                        }
+                    </div>
+                }
+
+                if (issuesTasks > 0)
+                {
+                    <div id="issuesTasks" class="status issues">
+                        <h2>Issues & Tasks</h2>
+                        @foreach (var release in selectedReleases)
+                        {
+                            var issuesFixedInRelease = release.Issues.Where(x => release.Features.Contains(x) == false).ToList();
+                            if (issuesFixedInRelease.Any())
+                            {
+                                <h3>Issues & Tasks fixed in version @release.Version</h3>
+                                foreach (var issue in issuesFixedInRelease)
+                                {
+                                    var url = issue.Source == ReleaseSource.YouTrack ? $"https://issues.umbraco.org/issue/{issue.Id}" : $"https://github.com/umbraco/Umbraco-CMS/issues/{issue.Id}";
+
+                                    <ul>
+                                        <li class="@issue.State.StateIcon()" title="@issue.State">
+                                            <a href="@(url)" target="_blank">@issue.Id - @issue.Title</a>
+                                        </li>
+                                    </ul>
+                                }
+                            }
+                        }
+                    </div>
+                }
+            }
+
+            <div id="issuesTasks" class="status issues">
+                <h2>Release Notes</h2>
+
+                @if (notesOnly)
+                {
+                    <p>
+                        What follows is a list of release notes, <a href="@RemoveQueryStringByKey(Request.Url.OriginalString, "notes")" style="text-decoration: underline">want to see the list of related issues?</a>
+                    </p>
+                }
+                @foreach (var version in selectedReleases.OrderByDescending(x => x.FullVersion))
+                {
+                    <h2>Notes for version @version.Version</h2>
+                    @Html.Raw(version.ReleaseDescription)
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@functions {
+
+    public static string RemoveQueryStringByKey(string url, string key)
+    {
+        var uri = new Uri(url);
+
+        // this gets all the query string key value pairs as a collection
+        var newQueryString = HttpUtility.ParseQueryString(uri.Query);
+
+        // this removes the key if exists
+        newQueryString.Remove(key);
+
+        // this gets the page path from root without QueryString
+        string pagePathWithoutQueryString = uri.GetLeftPart(UriPartial.Path);
+
+        return newQueryString.Count > 0
+            ? String.Format("{0}?{1}", pagePathWithoutQueryString, newQueryString)
+            : pagePathWithoutQueryString;
+    }
+
+}
